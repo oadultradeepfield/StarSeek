@@ -1,0 +1,20 @@
+*.iml
+.gradle
+/local.properties
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# IDE settings
+.idea/
+*.ipr
+*.iws
+
+# Agentic / AI tools
+.claude/
+.agents/
+CLAUDE.md
+plans/
