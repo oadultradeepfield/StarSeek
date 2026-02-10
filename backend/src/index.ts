@@ -4,13 +4,15 @@ import {env} from "cloudflare:workers";
 export class StarSeekContainer extends Container<Env> {
 	defaultPort = 8080;
 	sleepAfter = "2m";
-	envVars = {
-		ASTROMETRY_API_KEY: env.NOVA_API_KEY,
-		GEMINI_API_KEY: env.GEMINI_API_KEY,
-		CLOUDFLARE_ACCOUNT_ID: env.CLOUDFLARE_ACCOUNT_ID,
-		CLOUDFLARE_NAMESPACE_ID: env.CLOUDFLARE_NAMESPACE_ID,
-		CLOUDFLARE_API_TOKEN: env.CLOUDFLARE_API_TOKEN,
-	};
+	get envVars() {
+		return {
+			ASTROMETRY_API_KEY: env.NOVA_API_KEY,
+			GEMINI_API_KEY: env.GEMINI_API_KEY,
+			CLOUDFLARE_ACCOUNT_ID: env.CLOUDFLARE_ACCOUNT_ID,
+			CLOUDFLARE_NAMESPACE_ID: env.CLOUDFLARE_NAMESPACE_ID,
+			CLOUDFLARE_API_TOKEN: env.CLOUDFLARE_API_TOKEN,
+		};
+	}
 }
 
 export default {
