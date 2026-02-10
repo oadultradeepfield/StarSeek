@@ -45,7 +45,7 @@ type candidate struct {
 
 func (c *Client) GenerateFunFact(ctx context.Context, objectName, objectType string) (string, error) {
 	prompt := fmt.Sprintf(
-		"Generate a single interesting fun fact about the celestial object %s (%s). Keep it to 1-2 sentences, around 50-100 words. Focus on what makes it unique or fascinating.",
+		"Give one fun fact about %s (%s) in 1-2 short sentences, max 30 words.",
 		objectName, objectType,
 	)
 
