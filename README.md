@@ -52,38 +52,22 @@ stars, nebulae, galaxies, and star clusters visible in the frame.
 
 ### Tech Stack
 
-**Client:**
+**Android Client:**
 
 - Kotlin
 - Jetpack Compose
 - Material Design 3
-
-**Architecture:**
-
 - MVVM with Clean Architecture
 - Hilt for Dependency Injection
 - Kotlin Coroutines and Flow
-
-**Networking:**
-
-- Retrofit
-- OkHttp
-- Kotlinx Serialization
-
-**Local Storage:**
-
+- Retrofit, OkHttp, Kotlinx Serialization
 - Room Database
-
-**Image Loading:**
-
 - Coil
 
-**Testing:**
+**Backend:**
 
-- JUnit
-- MockK
-- Turbine
-- Kotlinx Coroutines Test
+- Go
+- Chi router
 
 ### Features
 
@@ -96,25 +80,27 @@ stars, nebulae, galaxies, and star clusters visible in the frame.
 - View history of past solves
 - Delete saved solves with associated images
 
-### Architecture
-
-The project follows Clean Architecture principles with the following layers:
+### Project Structure
 
 ```
-app/
-├── data/
-│   ├── local/          # Room database, DAOs, entities
-│   ├── remote/         # Retrofit API, DTOs
-│   ├── repository/     # Repository implementations
-│   └── mapper/         # Data mappers between layers
-├── domain/
-│   └── model/          # Domain models
-├── di/                 # Hilt dependency injection modules
-└── ui/
-    ├── upload/         # Image upload screen
-    ├── results/        # Solve results screen
-    ├── history/        # History screen
-    └── navigation/     # Navigation setup
+├── app/                    # Android application
+│   ├── data/
+│   │   ├── local/          # Room database, DAOs, entities
+│   │   ├── remote/         # Retrofit API, DTOs
+│   │   ├── repository/     # Repository implementations
+│   │   └── mapper/         # Data mappers between layers
+│   ├── domain/
+│   │   └── model/          # Domain models
+│   ├── di/                 # Hilt dependency injection modules
+│   └── ui/
+│       ├── upload/         # Image upload screen
+│       ├── results/        # Solve results screen
+│       ├── history/        # History screen
+│       └── navigation/     # Navigation setup
+└── backend/
+    └── container_src/      # Go API server (stateless proxy)
+        ├── cmd/server/     # Entry point
+        └── internal/       # Application code
 ```
 
 ## Getting Started
