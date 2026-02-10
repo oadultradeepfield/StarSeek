@@ -13,8 +13,11 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"server/internal/client/astrometry"
+	"server/internal/client/gemini"
+	"server/internal/client/kv"
 	"server/internal/config"
 	"server/internal/controller"
+	"server/internal/service/object"
 	"server/internal/service/solve"
 )
 
@@ -28,9 +31,12 @@ func main() {
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 
 	astrometryClient := astrometry.NewClient(cfg.AstrometryAPIKey)
+	kvClient := kv.NewClient(cfg.CloudflareAccountID, cfg.CloudflareNamespaceID, cfg.CloudflareAPIToken)
+	geminiClient := gemini.NewClient(cfg.GeminiAPIKey)
 	solveService := solve.NewService(astrometryClient)
+	objectService := object.NewService(kvClient, geminiClient)
 	solveController := controller.NewSolveController(solveService)
-	objectController := controller.NewObjectController()
+	objectController := controller.NewObjectController(objectService)
 
 	router := chi.NewRouter()
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
