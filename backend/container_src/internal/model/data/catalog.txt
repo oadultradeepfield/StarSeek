@@ -1,0 +1,337 @@
+# Celestial Objects Catalog
+# Format: name|constellation|type
+# Types: star, nebula, galaxy, cluster
+
+# Messier Objects
+M1|Taurus|nebula
+M2|Aquarius|cluster
+M3|Canes Venatici|cluster
+M4|Scorpius|cluster
+M5|Serpens|cluster
+M6|Scorpius|cluster
+M7|Scorpius|cluster
+M8|Sagittarius|nebula
+M9|Ophiuchus|cluster
+M10|Ophiuchus|cluster
+M11|Scutum|cluster
+M12|Ophiuchus|cluster
+M13|Hercules|cluster
+M14|Ophiuchus|cluster
+M15|Pegasus|cluster
+M16|Serpens|nebula
+M17|Sagittarius|nebula
+M18|Sagittarius|cluster
+M19|Ophiuchus|cluster
+M20|Sagittarius|nebula
+M21|Sagittarius|cluster
+M22|Sagittarius|cluster
+M23|Sagittarius|cluster
+M24|Sagittarius|cluster
+M25|Sagittarius|cluster
+M26|Scutum|cluster
+M27|Vulpecula|nebula
+M28|Sagittarius|cluster
+M29|Cygnus|cluster
+M30|Capricornus|cluster
+M31|Andromeda|galaxy
+M32|Andromeda|galaxy
+M33|Triangulum|galaxy
+M34|Perseus|cluster
+M35|Gemini|cluster
+M36|Auriga|cluster
+M37|Auriga|cluster
+M38|Auriga|cluster
+M39|Cygnus|cluster
+M41|Canis Major|cluster
+M42|Orion|nebula
+M43|Orion|nebula
+M44|Cancer|cluster
+M45|Taurus|cluster
+M46|Puppis|cluster
+M47|Puppis|cluster
+M48|Hydra|cluster
+M49|Virgo|galaxy
+M50|Monoceros|cluster
+M51|Canes Venatici|galaxy
+M52|Cassiopeia|cluster
+M53|Coma Berenices|cluster
+M54|Sagittarius|cluster
+M55|Sagittarius|cluster
+M56|Lyra|cluster
+M57|Lyra|nebula
+M58|Virgo|galaxy
+M59|Virgo|galaxy
+M60|Virgo|galaxy
+M61|Virgo|galaxy
+M62|Ophiuchus|cluster
+M63|Canes Venatici|galaxy
+M64|Coma Berenices|galaxy
+M65|Leo|galaxy
+M66|Leo|galaxy
+M67|Cancer|cluster
+M68|Hydra|cluster
+M69|Sagittarius|cluster
+M70|Sagittarius|cluster
+M71|Sagitta|cluster
+M72|Aquarius|cluster
+M73|Aquarius|cluster
+M74|Pisces|galaxy
+M75|Sagittarius|cluster
+M76|Perseus|nebula
+M77|Cetus|galaxy
+M78|Orion|nebula
+M79|Lepus|cluster
+M80|Scorpius|cluster
+M81|Ursa Major|galaxy
+M82|Ursa Major|galaxy
+M83|Hydra|galaxy
+M84|Virgo|galaxy
+M85|Coma Berenices|galaxy
+M86|Virgo|galaxy
+M87|Virgo|galaxy
+M88|Coma Berenices|galaxy
+M89|Virgo|galaxy
+M90|Virgo|galaxy
+M91|Coma Berenices|galaxy
+M92|Hercules|cluster
+M93|Puppis|cluster
+M94|Canes Venatici|galaxy
+M95|Leo|galaxy
+M96|Leo|galaxy
+M97|Ursa Major|nebula
+M98|Coma Berenices|galaxy
+M99|Coma Berenices|galaxy
+M100|Coma Berenices|galaxy
+M101|Ursa Major|galaxy
+M102|Draco|galaxy
+M103|Cassiopeia|cluster
+M104|Virgo|galaxy
+M105|Leo|galaxy
+M106|Canes Venatici|galaxy
+M107|Ophiuchus|cluster
+M108|Ursa Major|galaxy
+M109|Ursa Major|galaxy
+M110|Andromeda|galaxy
+
+# NGC Objects
+NGC 869|Perseus|cluster
+NGC 884|Perseus|cluster
+NGC 104|Tucana|cluster
+NGC 292|Tucana|galaxy
+NGC 5139|Centaurus|cluster
+NGC 6231|Scorpius|cluster
+NGC 6397|Ara|cluster
+NGC 6752|Pavo|cluster
+NGC 2070|Dorado|nebula
+NGC 3372|Carina|nebula
+NGC 7000|Cygnus|nebula
+NGC 7293|Aquarius|nebula
+NGC 6543|Draco|nebula
+NGC 2237|Monoceros|nebula
+NGC 6960|Cygnus|nebula
+NGC 6992|Cygnus|nebula
+NGC 1976|Orion|nebula
+NGC 2024|Orion|nebula
+NGC 1499|Perseus|nebula
+NGC 6888|Cygnus|nebula
+NGC 7635|Cassiopeia|nebula
+NGC 2392|Gemini|nebula
+NGC 3242|Hydra|nebula
+NGC 6826|Cygnus|nebula
+NGC 7009|Aquarius|nebula
+NGC 7027|Cygnus|nebula
+NGC 6720|Lyra|nebula
+NGC 6853|Vulpecula|nebula
+NGC 224|Andromeda|galaxy
+NGC 598|Triangulum|galaxy
+NGC 4594|Virgo|galaxy
+NGC 5194|Canes Venatici|galaxy
+NGC 4486|Virgo|galaxy
+NGC 4472|Virgo|galaxy
+NGC 253|Sculptor|galaxy
+NGC 55|Sculptor|galaxy
+NGC 300|Sculptor|galaxy
+NGC 1316|Fornax|galaxy
+NGC 5128|Centaurus|galaxy
+NGC 4631|Canes Venatici|galaxy
+NGC 4565|Coma Berenices|galaxy
+NGC 891|Andromeda|galaxy
+NGC 2403|Camelopardalis|galaxy
+NGC 3115|Sextans|galaxy
+NGC 4449|Canes Venatici|galaxy
+NGC 4038|Corvus|galaxy
+NGC 4039|Corvus|galaxy
+
+# IC Objects
+IC 434|Orion|nebula
+IC 1396|Cepheus|nebula
+IC 5070|Cygnus|nebula
+IC 1805|Cassiopeia|nebula
+IC 1848|Cassiopeia|nebula
+IC 2118|Eridanus|nebula
+IC 405|Auriga|nebula
+IC 410|Auriga|nebula
+IC 443|Gemini|nebula
+IC 2177|Monoceros|nebula
+IC 4604|Scorpius|nebula
+IC 4665|Ophiuchus|cluster
+IC 2602|Carina|cluster
+
+# Bright Stars
+Sirius|Canis Major|star
+Canopus|Carina|star
+Arcturus|Boötes|star
+Vega|Lyra|star
+Capella|Auriga|star
+Rigel|Orion|star
+Procyon|Canis Minor|star
+Betelgeuse|Orion|star
+Achernar|Eridanus|star
+Hadar|Centaurus|star
+Altair|Aquila|star
+Acrux|Crux|star
+Aldebaran|Taurus|star
+Antares|Scorpius|star
+Spica|Virgo|star
+Pollux|Gemini|star
+Fomalhaut|Piscis Austrinus|star
+Deneb|Cygnus|star
+Mimosa|Crux|star
+Regulus|Leo|star
+Adhara|Canis Major|star
+Castor|Gemini|star
+Gacrux|Crux|star
+Shaula|Scorpius|star
+Bellatrix|Orion|star
+Elnath|Taurus|star
+Miaplacidus|Carina|star
+Alnilam|Orion|star
+Alnair|Grus|star
+Alnitak|Orion|star
+Alioth|Ursa Major|star
+Dubhe|Ursa Major|star
+Mirfak|Perseus|star
+Kaus Australis|Sagittarius|star
+Wezen|Canis Major|star
+Alkaid|Ursa Major|star
+Sargas|Scorpius|star
+Avior|Carina|star
+Menkalinan|Auriga|star
+Atria|Triangulum Australe|star
+Alhena|Gemini|star
+Peacock|Pavo|star
+Polaris|Ursa Minor|star
+Mirzam|Canis Major|star
+Alphard|Hydra|star
+Hamal|Aries|star
+Diphda|Cetus|star
+Nunki|Sagittarius|star
+Mizar|Ursa Major|star
+Saiph|Orion|star
+Algol|Perseus|star
+Denebola|Leo|star
+Muhlifain|Centaurus|star
+Suhail|Vela|star
+Sadr|Cygnus|star
+Mintaka|Orion|star
+Alphecca|Corona Borealis|star
+Schedar|Cassiopeia|star
+Etamin|Draco|star
+Naos|Puppis|star
+Aspidiske|Carina|star
+Almach|Andromeda|star
+Caph|Cassiopeia|star
+Larawag|Scorpius|star
+Dschubba|Scorpius|star
+Izar|Boötes|star
+Merak|Ursa Major|star
+Ankaa|Phoenix|star
+Enif|Pegasus|star
+Girtab|Scorpius|star
+Scheat|Pegasus|star
+Sabik|Ophiuchus|star
+Phecda|Ursa Major|star
+Aludra|Canis Major|star
+Markab|Pegasus|star
+Markeb|Vela|star
+Alderamin|Cepheus|star
+Arneb|Lepus|star
+Gienah|Corvus|star
+Zubeneschamali|Libra|star
+Phact|Columba|star
+Unukalhai|Serpens|star
+Mahasim|Auriga|star
+Kraz|Corvus|star
+Lesath|Scorpius|star
+Zubenelgenubi|Libra|star
+Kornephoros|Hercules|star
+Rasalgethi|Hercules|star
+Algenib|Pegasus|star
+Albireo|Cygnus|star
+Tureis|Puppis|star
+Rukbat|Sagittarius|star
+Mira|Cetus|star
+Mirach|Andromeda|star
+Alpheratz|Andromeda|star
+Rasalhague|Ophiuchus|star
+Tiaki|Grus|star
+Algieba|Leo|star
+Kochab|Ursa Minor|star
+
+# Common Names
+Large Magellanic Cloud|Dorado|galaxy
+Small Magellanic Cloud|Tucana|galaxy
+LMC|Dorado|galaxy
+SMC|Tucana|galaxy
+Pleiades|Taurus|cluster
+Hyades|Taurus|cluster
+Double Cluster|Perseus|cluster
+Beehive Cluster|Cancer|cluster
+Praesepe|Cancer|cluster
+Omega Centauri|Centaurus|cluster
+47 Tucanae|Tucana|cluster
+Jewel Box|Crux|cluster
+Southern Pleiades|Carina|cluster
+Wishing Well Cluster|Carina|cluster
+Orion Nebula|Orion|nebula
+Carina Nebula|Carina|nebula
+Eta Carinae Nebula|Carina|nebula
+Lagoon Nebula|Sagittarius|nebula
+Trifid Nebula|Sagittarius|nebula
+Eagle Nebula|Serpens|nebula
+Omega Nebula|Sagittarius|nebula
+Swan Nebula|Sagittarius|nebula
+North America Nebula|Cygnus|nebula
+Pelican Nebula|Cygnus|nebula
+Rosette Nebula|Monoceros|nebula
+Horsehead Nebula|Orion|nebula
+Flame Nebula|Orion|nebula
+Ring Nebula|Lyra|nebula
+Dumbbell Nebula|Vulpecula|nebula
+Helix Nebula|Aquarius|nebula
+Cat's Eye Nebula|Draco|nebula
+Crab Nebula|Taurus|nebula
+Veil Nebula|Cygnus|nebula
+Tarantula Nebula|Dorado|nebula
+California Nebula|Perseus|nebula
+Heart Nebula|Cassiopeia|nebula
+Soul Nebula|Cassiopeia|nebula
+Witch Head Nebula|Eridanus|nebula
+Flaming Star Nebula|Auriga|nebula
+Bubble Nebula|Cassiopeia|nebula
+Crescent Nebula|Cygnus|nebula
+Andromeda Galaxy|Andromeda|galaxy
+Triangulum Galaxy|Triangulum|galaxy
+Pinwheel Galaxy|Ursa Major|galaxy
+Whirlpool Galaxy|Canes Venatici|galaxy
+Sombrero Galaxy|Virgo|galaxy
+Bode's Galaxy|Ursa Major|galaxy
+Cigar Galaxy|Ursa Major|galaxy
+Black Eye Galaxy|Coma Berenices|galaxy
+Sunflower Galaxy|Canes Venatici|galaxy
+Sculptor Galaxy|Sculptor|galaxy
+Centaurus A|Centaurus|galaxy
+Southern Pinwheel Galaxy|Hydra|galaxy
+Needle Galaxy|Coma Berenices|galaxy
+Leo Triplet|Leo|galaxy
+Antennae Galaxies|Corvus|galaxy
