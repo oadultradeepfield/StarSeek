@@ -68,6 +68,8 @@ stars, nebulae, galaxies, and star clusters visible in the frame.
 
 - Go
 - Chi router
+- Gemini API for AI-generated fun facts
+- Cloudflare KV for caching
 
 ### Features
 
@@ -75,7 +77,7 @@ stars, nebulae, galaxies, and star clusters visible in the frame.
 - Automatic plate solving to identify celestial objects
 - View annotated images with identified objects highlighted
 - Browse identified objects grouped by constellation and type
-- View detailed information about each celestial object
+- View detailed information about each celestial object with AI-generated fun facts
 - Cache solved images locally for offline access
 - View history of past solves
 - Delete saved solves with associated images
@@ -98,9 +100,15 @@ stars, nebulae, galaxies, and star clusters visible in the frame.
 │       ├── history/        # History screen
 │       └── navigation/     # Navigation setup
 └── backend/
-    └── container_src/      # Go API server (stateless proxy)
+    └── container_src/      # Go API server
         ├── cmd/server/     # Entry point
-        └── internal/       # Application code
+        └── internal/
+            ├── client/     # External API clients (Astrometry, Gemini, KV)
+            ├── config/     # Environment configuration
+            ├── controller/ # HTTP handlers
+            ├── model/      # Domain models and catalog data
+            ├── service/    # Business logic (solve, object)
+            └── view/       # Response DTOs
 ```
 
 ## Getting Started
