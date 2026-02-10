@@ -22,7 +22,7 @@ func GetCelestialObject(name string) (*CelestialObject, bool) {
 	}
 
 	return &CelestialObject{
-		Name:          name,
+		Name:          info.Name,
 		Type:          info.Type,
 		Constellation: info.Constellation,
 	}, true

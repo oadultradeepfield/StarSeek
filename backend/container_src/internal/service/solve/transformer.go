@@ -18,7 +18,6 @@ func TransformAnnotations(annotations []astrometry.Annotation, jobID int) *model
 			continue
 		}
 
-		var matchedName string
 		var info data.ObjectInfo
 		var known bool
 
@@ -26,7 +25,6 @@ func TransformAnnotations(annotations []astrometry.Annotation, jobID int) *model
 			for _, part := range strings.Split(rawName, "/") {
 				name := strings.TrimSpace(part)
 				if info, known = data.GetObjectInfo(name); known {
-					matchedName = name
 					break
 				}
 			}
@@ -35,13 +33,13 @@ func TransformAnnotations(annotations []astrometry.Annotation, jobID int) *model
 			}
 		}
 
-		if !known || seen[matchedName] {
+		if !known || seen[info.Name] {
 			continue
 		}
 
-		seen[matchedName] = true
+		seen[info.Name] = true
 		obj := model.CelestialObject{
-			Name:          matchedName,
+			Name:          info.Name,
 			Type:          info.Type,
 			Constellation: info.Constellation,
 		}

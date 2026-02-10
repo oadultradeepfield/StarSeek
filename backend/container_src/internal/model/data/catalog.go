@@ -9,6 +9,7 @@ import (
 var catalogData string
 
 type ObjectInfo struct {
+	Name          string
 	Constellation string
 	Type          string
 }
@@ -29,7 +30,8 @@ func init() {
 			continue
 		}
 
-		catalog[parts[0]] = ObjectInfo{
+		catalog[strings.ToLower(parts[0])] = ObjectInfo{
+			Name:          parts[0],
 			Constellation: parts[1],
 			Type:          parts[2],
 		}
@@ -37,6 +39,6 @@ func init() {
 }
 
 func GetObjectInfo(name string) (ObjectInfo, bool) {
-	info, ok := catalog[name]
+	info, ok := catalog[strings.ToLower(name)]
 	return info, ok
 }
