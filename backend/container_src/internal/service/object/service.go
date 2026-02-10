@@ -3,6 +3,7 @@ package object
 import (
 	"context"
 	"log"
+	"strings"
 
 	"server/internal/model"
 )
@@ -52,9 +53,10 @@ func (s *Service) GetObjectDetail(ctx context.Context, name string) (*ObjectDeta
 }
 
 func (s *Service) getFunFact(ctx context.Context, name, objectType string) (string, error) {
-	cached, found, err := s.kvClient.Get(ctx, name)
+	cacheKey := strings.ToLower(name)
+	cached, found, err := s.kvClient.Get(ctx, cacheKey)
 	if err != nil {
-		log.Printf("KV read failed for %s: %v", name, err)
+		log.Printf("KV read failed for %s: %v", cacheKey, err)
 	} else if found {
 		return cached, nil
 	}
@@ -64,8 +66,8 @@ func (s *Service) getFunFact(ctx context.Context, name, objectType string) (stri
 		return "", err
 	}
 
-	if err := s.kvClient.Put(ctx, name, funFact); err != nil {
-		log.Printf("KV write failed for %s: %v", name, err)
+	if err := s.kvClient.Put(ctx, cacheKey, funFact); err != nil {
+		log.Printf("KV write failed for %s: %v", cacheKey, err)
 	}
 	return funFact, nil
 }
