@@ -53,7 +53,8 @@ type SubmissionResponse struct {
 }
 
 type JobResponse struct {
-	Status string `json:"status"`
+	Status         string   `json:"status"`
+	ObjectsInField []string `json:"objects_in_field"`
 }
 
 type Annotation struct {
@@ -182,7 +183,7 @@ func (c *Client) GetSubmission(ctx context.Context, subID int) (*SubmissionRespo
 }
 
 func (c *Client) GetJob(ctx context.Context, jobID int) (*JobResponse, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/jobs/%d", baseURL, jobID), nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/jobs/%d/info", baseURL, jobID), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create get job request: %w", err)
 	}

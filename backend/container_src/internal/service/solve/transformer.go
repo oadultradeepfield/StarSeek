@@ -9,7 +9,7 @@ import (
 	"server/internal/model/data"
 )
 
-func TransformAnnotations(annotations []astrometry.Annotation, jobID int) *model.SolveResult {
+func TransformAnnotations(annotations []astrometry.Annotation, objectsInField []string, jobID int) *model.SolveResult {
 	var objects []model.CelestialObject
 	seen := make(map[string]bool)
 
@@ -42,6 +42,7 @@ func TransformAnnotations(annotations []astrometry.Annotation, jobID int) *model
 			Name:          info.Name,
 			Type:          info.Type,
 			Constellation: info.Constellation,
+			DisplayName:   info.DisplayName,
 		}
 
 		if info.Type == "star" && ann.PixelX != 0 && ann.PixelY != 0 {
@@ -51,6 +52,20 @@ func TransformAnnotations(annotations []astrometry.Annotation, jobID int) *model
 		}
 
 		objects = append(objects, obj)
+	}
+
+	for _, rawName := range objectsInField {
+		info, known := data.GetObjectInfo(rawName)
+		if !known || seen[info.Name] {
+			continue
+		}
+		seen[info.Name] = true
+		objects = append(objects, model.CelestialObject{
+			Name:          info.Name,
+			Type:          info.Type,
+			Constellation: info.Constellation,
+			DisplayName:   info.DisplayName,
+		})
 	}
 
 	return &model.SolveResult{
