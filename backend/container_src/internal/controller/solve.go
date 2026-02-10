@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"server/internal/model"
+	"server/internal/service/object"
 	"server/internal/service/solve"
 	"server/internal/view"
 )
@@ -90,10 +90,16 @@ func (c *SolveController) GetSolveStatus(w http.ResponseWriter, r *http.Request)
 	})
 }
 
-type ObjectController struct{}
+type ObjectService interface {
+	GetObjectDetail(ctx context.Context, name string) (*object.ObjectDetail, error)
+}
 
-func NewObjectController() *ObjectController {
-	return &ObjectController{}
+type ObjectController struct {
+	service ObjectService
+}
+
+func NewObjectController(service ObjectService) *ObjectController {
+	return &ObjectController{service: service}
 }
 
 func (c *ObjectController) GetObjectDetail(w http.ResponseWriter, r *http.Request) {
@@ -103,8 +109,13 @@ func (c *ObjectController) GetObjectDetail(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	obj, ok := model.GetCelestialObject(name)
-	if !ok {
+	obj, err := c.service.GetObjectDetail(r.Context(), name)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "Failed to generate object details")
+		return
+	}
+
+	if obj == nil {
 		writeError(w, http.StatusNotFound, "Object not found")
 		return
 	}
@@ -113,6 +124,7 @@ func (c *ObjectController) GetObjectDetail(w http.ResponseWriter, r *http.Reques
 		Name:          obj.Name,
 		Type:          obj.Type,
 		Constellation: obj.Constellation,
+		FunFact:       obj.FunFact,
 	})
 }
 

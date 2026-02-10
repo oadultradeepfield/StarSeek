@@ -34,6 +34,7 @@ type ObjectDetailResponse struct {
 	Name          string `json:"name"`
 	Type          string `json:"type"`
 	Constellation string `json:"constellation"`
+	FunFact       string `json:"funFact"`
 }
 
 func FromSolveResult(r *model.SolveResult) *SolveResult {
