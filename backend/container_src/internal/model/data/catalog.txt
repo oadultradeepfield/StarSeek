@@ -1,117 +1,117 @@
 # Celestial Objects Catalog
-# Format: name|constellation|type
+# Format: name|constellation|type|displayName (optional)
 # Types: star, nebula, galaxy, cluster
 
 # Messier Objects
-M1|Taurus|nebula
-M2|Aquarius|cluster
-M3|Canes Venatici|cluster
-M4|Scorpius|cluster
-M5|Serpens|cluster
-M6|Scorpius|cluster
-M7|Scorpius|cluster
-M8|Sagittarius|nebula
-M9|Ophiuchus|cluster
-M10|Ophiuchus|cluster
-M11|Scutum|cluster
-M12|Ophiuchus|cluster
-M13|Hercules|cluster
-M14|Ophiuchus|cluster
-M15|Pegasus|cluster
-M16|Serpens|nebula
-M17|Sagittarius|nebula
-M18|Sagittarius|cluster
-M19|Ophiuchus|cluster
-M20|Sagittarius|nebula
-M21|Sagittarius|cluster
-M22|Sagittarius|cluster
-M23|Sagittarius|cluster
-M24|Sagittarius|cluster
-M25|Sagittarius|cluster
-M26|Scutum|cluster
-M27|Vulpecula|nebula
-M28|Sagittarius|cluster
-M29|Cygnus|cluster
-M30|Capricornus|cluster
-M31|Andromeda|galaxy
-M32|Andromeda|galaxy
-M33|Triangulum|galaxy
-M34|Perseus|cluster
-M35|Gemini|cluster
-M36|Auriga|cluster
-M37|Auriga|cluster
-M38|Auriga|cluster
-M39|Cygnus|cluster
-M41|Canis Major|cluster
-M42|Orion|nebula
-M43|Orion|nebula
-M44|Cancer|cluster
-M45|Taurus|cluster
-M46|Puppis|cluster
-M47|Puppis|cluster
-M48|Hydra|cluster
-M49|Virgo|galaxy
-M50|Monoceros|cluster
-M51|Canes Venatici|galaxy
-M52|Cassiopeia|cluster
-M53|Coma Berenices|cluster
-M54|Sagittarius|cluster
-M55|Sagittarius|cluster
-M56|Lyra|cluster
-M57|Lyra|nebula
-M58|Virgo|galaxy
-M59|Virgo|galaxy
-M60|Virgo|galaxy
-M61|Virgo|galaxy
-M62|Ophiuchus|cluster
-M63|Canes Venatici|galaxy
-M64|Coma Berenices|galaxy
-M65|Leo|galaxy
-M66|Leo|galaxy
-M67|Cancer|cluster
-M68|Hydra|cluster
-M69|Sagittarius|cluster
-M70|Sagittarius|cluster
-M71|Sagitta|cluster
-M72|Aquarius|cluster
-M73|Aquarius|cluster
-M74|Pisces|galaxy
-M75|Sagittarius|cluster
-M76|Perseus|nebula
-M77|Cetus|galaxy
-M78|Orion|nebula
-M79|Lepus|cluster
-M80|Scorpius|cluster
-M81|Ursa Major|galaxy
-M82|Ursa Major|galaxy
-M83|Hydra|galaxy
-M84|Virgo|galaxy
-M85|Coma Berenices|galaxy
-M86|Virgo|galaxy
-M87|Virgo|galaxy
-M88|Coma Berenices|galaxy
-M89|Virgo|galaxy
-M90|Virgo|galaxy
-M91|Coma Berenices|galaxy
-M92|Hercules|cluster
-M93|Puppis|cluster
-M94|Canes Venatici|galaxy
-M95|Leo|galaxy
-M96|Leo|galaxy
-M97|Ursa Major|nebula
-M98|Coma Berenices|galaxy
-M99|Coma Berenices|galaxy
-M100|Coma Berenices|galaxy
-M101|Ursa Major|galaxy
-M102|Draco|galaxy
-M103|Cassiopeia|cluster
-M104|Virgo|galaxy
-M105|Leo|galaxy
-M106|Canes Venatici|galaxy
-M107|Ophiuchus|cluster
-M108|Ursa Major|galaxy
-M109|Ursa Major|galaxy
-M110|Andromeda|galaxy
+M1|Taurus|nebula|Crab Nebula
+M2|Aquarius|cluster|Messier 2 Globular Cluster
+M3|Canes Venatici|cluster|Messier 3 Globular Cluster
+M4|Scorpius|cluster|Messier 4 Globular Cluster
+M5|Serpens|cluster|Messier 5 Globular Cluster
+M6|Scorpius|cluster|Butterfly Cluster
+M7|Scorpius|cluster|Ptolemy Cluster
+M8|Sagittarius|nebula|Lagoon Nebula
+M9|Ophiuchus|cluster|Messier 9 Globular Cluster
+M10|Ophiuchus|cluster|Messier 10 Globular Cluster
+M11|Scutum|cluster|Wild Duck Cluster
+M12|Ophiuchus|cluster|Gumball Globular Cluster
+M13|Hercules|cluster|Hercules Globular Cluster
+M14|Ophiuchus|cluster|Messier 14 Globular Cluster
+M15|Pegasus|cluster|Pegasus Globular Cluster
+M16|Serpens|nebula|Eagle Nebula
+M17|Sagittarius|nebula|Omega Nebula
+M18|Sagittarius|cluster|Messier 18 Open Cluster
+M19|Ophiuchus|cluster|Messier 19 Globular Cluster
+M20|Sagittarius|nebula|Trifid Nebula
+M21|Sagittarius|cluster|Messier 21 Open Cluster
+M22|Sagittarius|cluster|Sagittarius Globular Cluster
+M23|Sagittarius|cluster|Messier 23 Open Cluster
+M24|Sagittarius|cluster|Sagittarius Star Cloud
+M25|Sagittarius|cluster|Messier 25 Open Cluster
+M26|Scutum|cluster|Messier 26 Open Cluster
+M27|Vulpecula|nebula|Dumbbell Nebula
+M28|Sagittarius|cluster|Messier 28 Globular Cluster
+M29|Cygnus|cluster|Cooling Tower Cluster
+M30|Capricornus|cluster|Messier 30 Globular Cluster
+M31|Andromeda|galaxy|Andromeda Galaxy
+M32|Andromeda|galaxy|Messier 32 Dwarf Galaxy
+M33|Triangulum|galaxy|Triangulum Galaxy
+M34|Perseus|cluster|Messier 34 Open Cluster
+M35|Gemini|cluster|Messier 35 Open Cluster
+M36|Auriga|cluster|Pinwheel Cluster
+M37|Auriga|cluster|January Salt and Pepper Cluster
+M38|Auriga|cluster|Starfish Cluster
+M39|Cygnus|cluster|Messier 39 Open Cluster
+M41|Canis Major|cluster|Little Beehive Cluster
+M42|Orion|nebula|Orion Nebula
+M43|Orion|nebula|De Mairan's Nebula
+M44|Cancer|cluster|Beehive Cluster
+M45|Taurus|cluster|Pleiades Star Cluster
+M46|Puppis|cluster|Messier 46 Open Cluster
+M47|Puppis|cluster|Messier 47 Open Cluster
+M48|Hydra|cluster|Messier 48 Open Cluster
+M49|Virgo|galaxy|Messier 49 Elliptical Galaxy
+M50|Monoceros|cluster|Heart-Shaped Cluster
+M51|Canes Venatici|galaxy|Whirlpool Galaxy
+M52|Cassiopeia|cluster|Messier 52 Open Cluster
+M53|Coma Berenices|cluster|Messier 53 Globular Cluster
+M54|Sagittarius|cluster|Messier 54 Globular Cluster
+M55|Sagittarius|cluster|Summer Rose Star Cluster
+M56|Lyra|cluster|Messier 56 Globular Cluster
+M57|Lyra|nebula|Ring Nebula
+M58|Virgo|galaxy|Messier 58 Barred Spiral Galaxy
+M59|Virgo|galaxy|Messier 59 Elliptical Galaxy
+M60|Virgo|galaxy|Messier 60 Elliptical Galaxy
+M61|Virgo|galaxy|Messier 61 Spiral Galaxy
+M62|Ophiuchus|cluster|Flickering Globular Cluster
+M63|Canes Venatici|galaxy|Sunflower Galaxy
+M64|Coma Berenices|galaxy|Black Eye Galaxy
+M65|Leo|galaxy|Leo Triplet Galaxy
+M66|Leo|galaxy|Leo Triplet Galaxy
+M67|Cancer|cluster|King Cobra Cluster
+M68|Hydra|cluster|Messier 68 Globular Cluster
+M69|Sagittarius|cluster|Messier 69 Globular Cluster
+M70|Sagittarius|cluster|Messier 70 Globular Cluster
+M71|Sagitta|cluster|Messier 71 Globular Cluster
+M72|Aquarius|cluster|Messier 72 Globular Cluster
+M73|Aquarius|cluster|Messier 73 Asterism
+M74|Pisces|galaxy|Phantom Galaxy
+M75|Sagittarius|cluster|Messier 75 Globular Cluster
+M76|Perseus|nebula|Little Dumbbell Nebula
+M77|Cetus|galaxy|Cetus A Galaxy
+M78|Orion|nebula|Casper the Friendly Ghost Nebula
+M79|Lepus|cluster|Messier 79 Globular Cluster
+M80|Scorpius|cluster|Messier 80 Globular Cluster
+M81|Ursa Major|galaxy|Bode's Galaxy
+M82|Ursa Major|galaxy|Cigar Galaxy
+M83|Hydra|galaxy|Southern Pinwheel Galaxy
+M84|Virgo|galaxy|Messier 84 Lenticular Galaxy
+M85|Coma Berenices|galaxy|Messier 85 Lenticular Galaxy
+M86|Virgo|galaxy|Messier 86 Lenticular Galaxy
+M87|Virgo|galaxy|Virgo A Galaxy
+M88|Coma Berenices|galaxy|Messier 88 Spiral Galaxy
+M89|Virgo|galaxy|Messier 89 Elliptical Galaxy
+M90|Virgo|galaxy|Messier 90 Spiral Galaxy
+M91|Coma Berenices|galaxy|Messier 91 Barred Spiral Galaxy
+M92|Hercules|cluster|Messier 92 Globular Cluster
+M93|Puppis|cluster|Messier 93 Open Cluster
+M94|Canes Venatici|galaxy|Croc's Eye Galaxy
+M95|Leo|galaxy|Messier 95 Barred Spiral Galaxy
+M96|Leo|galaxy|Messier 96 Spiral Galaxy
+M97|Ursa Major|nebula|Owl Nebula
+M98|Coma Berenices|galaxy|Messier 98 Spiral Galaxy
+M99|Coma Berenices|galaxy|Coma Pinwheel Galaxy
+M100|Coma Berenices|galaxy|Mirror Galaxy
+M101|Ursa Major|galaxy|Pinwheel Galaxy
+M102|Draco|galaxy|Spindle Galaxy
+M103|Cassiopeia|cluster|Messier 103 Open Cluster
+M104|Virgo|galaxy|Sombrero Galaxy
+M105|Leo|galaxy|Messier 105 Elliptical Galaxy
+M106|Canes Venatici|galaxy|Messier 106 Spiral Galaxy
+M107|Ophiuchus|cluster|Messier 107 Globular Cluster
+M108|Ursa Major|galaxy|Surfboard Galaxy
+M109|Ursa Major|galaxy|Vacuum Cleaner Galaxy
+M110|Andromeda|galaxy|Messier 110 Dwarf Galaxy
 
 # NGC Objects
 NGC 869|Perseus|cluster

@@ -12,6 +12,14 @@ type ObjectInfo struct {
 	Name          string
 	Constellation string
 	Type          string
+	DisplayName   string
+}
+
+func (o ObjectInfo) GetDisplayName() string {
+	if o.DisplayName != "" {
+		return o.DisplayName
+	}
+	return o.Name
 }
 
 var catalog map[string]ObjectInfo
@@ -26,15 +34,19 @@ func init() {
 		}
 
 		parts := strings.Split(line, "|")
-		if len(parts) != 3 {
+		if len(parts) < 3 {
 			continue
 		}
 
-		catalog[strings.ToLower(parts[0])] = ObjectInfo{
+		info := ObjectInfo{
 			Name:          parts[0],
 			Constellation: parts[1],
 			Type:          parts[2],
 		}
+		if len(parts) >= 4 {
+			info.DisplayName = parts[3]
+		}
+		catalog[strings.ToLower(parts[0])] = info
 	}
 }
 

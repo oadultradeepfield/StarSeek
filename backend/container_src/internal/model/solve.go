@@ -6,8 +6,16 @@ type CelestialObject struct {
 	Name          string
 	Type          string
 	Constellation string
+	DisplayName   string
 	PixelX        *float64
 	PixelY        *float64
+}
+
+func (o CelestialObject) GetDisplayName() string {
+	if o.DisplayName != "" {
+		return o.DisplayName
+	}
+	return o.Name
 }
 
 type SolveResult struct {
@@ -25,5 +33,6 @@ func GetCelestialObject(name string) (*CelestialObject, bool) {
 		Name:          info.Name,
 		Type:          info.Type,
 		Constellation: info.Constellation,
+		DisplayName:   info.DisplayName,
 	}, true
 }

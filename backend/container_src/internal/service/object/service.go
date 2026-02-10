@@ -39,7 +39,7 @@ func (s *Service) GetObjectDetail(ctx context.Context, name string) (*ObjectDeta
 		return nil, nil
 	}
 
-	funFact, err := s.getFunFact(ctx, obj.Name, obj.Type)
+	funFact, err := s.getFunFact(ctx, obj.Name, obj.GetDisplayName(), obj.Type)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (s *Service) GetObjectDetail(ctx context.Context, name string) (*ObjectDeta
 	}, nil
 }
 
-func (s *Service) getFunFact(ctx context.Context, name, objectType string) (string, error) {
+func (s *Service) getFunFact(ctx context.Context, name, displayName, objectType string) (string, error) {
 	cacheKey := strings.ToLower(name)
 	cached, found, err := s.kvClient.Get(ctx, cacheKey)
 	if err != nil {
@@ -61,7 +61,7 @@ func (s *Service) getFunFact(ctx context.Context, name, objectType string) (stri
 		return cached, nil
 	}
 
-	funFact, err := s.geminiClient.GenerateFunFact(ctx, name, objectType)
+	funFact, err := s.geminiClient.GenerateFunFact(ctx, displayName, objectType)
 	if err != nil {
 		return "", err
 	}
