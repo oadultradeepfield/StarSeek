@@ -1,7 +1,4 @@
-<style>
-  .center-text { text-align: center; }
-</style>
-<div class="center-text">
+<div align="center">
   <img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" alt="logo" width="192" height="192" />
   <h1>StarSeek</h1>
   <p>An Android app for identifying celestial objects in star field images using plate solving technology.</p>
@@ -47,7 +44,7 @@ stars, nebulae, galaxies, and star clusters visible in the frame.
 
 ### Screenshots
 
-<div class="center-text">
+<div align="center">
   <img src="assets/screenshot1.png" alt="screenshot" width="200" />
   <img src="assets/screenshot2.png" alt="screenshot" width="200" />
   <img src="assets/screenshot3.png" alt="screenshot" width="200" />
