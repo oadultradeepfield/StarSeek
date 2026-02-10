@@ -35,12 +35,8 @@
 - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
-    - [Running Tests](#running-tests)
 - [Usage](#usage)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
 - [License](#license)
-- [Contact](#contact)
 - [Acknowledgements](#acknowledgements)
 
 ## About the Project
