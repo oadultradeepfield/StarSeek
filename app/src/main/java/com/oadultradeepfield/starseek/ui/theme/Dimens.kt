@@ -2,7 +2,7 @@ package com.oadultradeepfield.starseek.ui.theme
 
 import androidx.compose.ui.unit.dp
 
-@Suppress("unused", "unused")
+@Suppress("unused")
 object Dimens {
   val spacingXSmall = 4.dp
   val spacingSmall = 8.dp
