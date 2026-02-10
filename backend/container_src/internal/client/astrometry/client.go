@@ -115,7 +115,7 @@ func (c *Client) GetSession(ctx context.Context) (string, error) {
 func (c *Client) Upload(ctx context.Context, session string, imageData []byte, filename string) (int, error) {
 	var buf bytes.Buffer
 	writer := multipart.NewWriter(&buf)
-	requestJSON := fmt.Sprintf(`{"session":"%s","allow_commercial_use":"n","allow_modifications":"n"}`, session)
+	requestJSON := fmt.Sprintf(`{"session":"%s","allow_commercial_use":"n","allow_modifications":"n","publicly_visible":"n"}`, session)
 	if err := writer.WriteField("request-json", requestJSON); err != nil {
 		return 0, fmt.Errorf("failed to write request-json field: %w", err)
 	}
