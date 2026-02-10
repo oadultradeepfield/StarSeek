@@ -46,10 +46,10 @@ type UploadResponse struct {
 }
 
 type SubmissionResponse struct {
-	ProcessingStarted  string `json:"processing_started"`
-	ProcessingFinished string `json:"processing_finished"`
-	JobCalibrations    []int  `json:"job_calibrations"`
-	Jobs               []int  `json:"jobs"`
+	ProcessingStarted  string  `json:"processing_started"`
+	ProcessingFinished string  `json:"processing_finished"`
+	JobCalibrations    [][]int `json:"job_calibrations"`
+	Jobs               []int   `json:"jobs"`
 }
 
 type JobResponse struct {
