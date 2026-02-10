@@ -2,6 +2,7 @@ package solve
 
 import (
 	"strconv"
+	"strings"
 
 	"server/internal/client/astrometry"
 	"server/internal/model"
@@ -17,19 +18,30 @@ func TransformAnnotations(annotations []astrometry.Annotation, jobID int) *model
 			continue
 		}
 
-		name := ann.Names[0]
-		if seen[name] {
+		var matchedName string
+		var info data.ObjectInfo
+		var known bool
+
+		for _, rawName := range ann.Names {
+			for _, part := range strings.Split(rawName, "/") {
+				name := strings.TrimSpace(part)
+				if info, known = data.GetObjectInfo(name); known {
+					matchedName = name
+					break
+				}
+			}
+			if known {
+				break
+			}
+		}
+
+		if !known || seen[matchedName] {
 			continue
 		}
 
-		seen[name] = true
-		info, known := data.GetObjectInfo(name)
-		if !known {
-			continue
-		}
-
+		seen[matchedName] = true
 		obj := model.CelestialObject{
-			Name:          name,
+			Name:          matchedName,
 			Type:          info.Type,
 			Constellation: info.Constellation,
 		}
