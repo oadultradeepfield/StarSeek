@@ -2,13 +2,13 @@ package com.oadultradeepfield.starseek.ui.results
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.oadultradeepfield.starseek.data.repository.SolveRepository
+import com.oadultradeepfield.starseek.domain.repository.SolveRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class ResultsViewModel @Inject constructor(private val repository: SolveRepository) : ViewModel() {

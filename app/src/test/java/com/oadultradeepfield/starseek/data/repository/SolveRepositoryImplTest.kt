@@ -9,6 +9,7 @@ import com.oadultradeepfield.starseek.data.remote.dto.JobStatusResponse
 import com.oadultradeepfield.starseek.data.remote.dto.JobStatusType
 import com.oadultradeepfield.starseek.data.remote.dto.ObjectDetailResponse
 import com.oadultradeepfield.starseek.data.remote.dto.SolveResponse
+import com.oadultradeepfield.starseek.domain.model.JobStatus
 import com.oadultradeepfield.starseek.domain.model.ObjectType
 import com.oadultradeepfield.starseek.testutil.TestData
 import io.mockk.coEvery

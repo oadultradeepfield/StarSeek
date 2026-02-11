@@ -1,9 +1,9 @@
 package com.oadultradeepfield.starseek.ui.results
 
 import app.cash.turbine.test
-import com.oadultradeepfield.starseek.data.repository.SolveRepository
 import com.oadultradeepfield.starseek.domain.model.ObjectDetail
 import com.oadultradeepfield.starseek.domain.model.ObjectType
+import com.oadultradeepfield.starseek.domain.repository.SolveRepository
 import com.oadultradeepfield.starseek.testutil.TestData
 import io.mockk.coEvery
 import io.mockk.mockk

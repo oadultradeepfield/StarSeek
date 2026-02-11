@@ -1,6 +1,4 @@
-package com.oadultradeepfield.starseek.data.repository
-
-import com.oadultradeepfield.starseek.domain.model.Solve
+package com.oadultradeepfield.starseek.domain.model
 
 sealed class JobStatus {
   data object Processing : JobStatus()

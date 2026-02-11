@@ -1,5 +1,6 @@
-package com.oadultradeepfield.starseek.data.repository
+package com.oadultradeepfield.starseek.domain.repository
 
+import com.oadultradeepfield.starseek.domain.model.JobStatus
 import com.oadultradeepfield.starseek.domain.model.ObjectDetail
 import com.oadultradeepfield.starseek.domain.model.Solve
 import kotlinx.coroutines.flow.Flow

@@ -2,9 +2,9 @@ package com.oadultradeepfield.starseek.ui.upload
 
 import android.net.Uri
 import app.cash.turbine.test
-import com.oadultradeepfield.starseek.data.ImageProcessorImpl
-import com.oadultradeepfield.starseek.data.repository.JobStatus
-import com.oadultradeepfield.starseek.data.repository.SolveRepository
+import com.oadultradeepfield.starseek.domain.model.JobStatus
+import com.oadultradeepfield.starseek.domain.repository.ImageProcessor
+import com.oadultradeepfield.starseek.domain.repository.SolveRepository
 import com.oadultradeepfield.starseek.testutil.TestData
 import io.mockk.coEvery
 import io.mockk.every
@@ -26,7 +26,7 @@ import org.junit.Test
 class UploadViewModelTest {
   private val testDispatcher = StandardTestDispatcher()
   private lateinit var repository: SolveRepository
-  private lateinit var imageProcessor: ImageProcessorImpl
+  private lateinit var imageProcessor: ImageProcessor
   private lateinit var viewModel: UploadViewModel
 
   @Before

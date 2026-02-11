@@ -3,8 +3,8 @@ package com.oadultradeepfield.starseek.ui.history
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.oadultradeepfield.starseek.data.ImageProcessorImpl
-import com.oadultradeepfield.starseek.data.repository.SolveRepository
+import com.oadultradeepfield.starseek.domain.repository.ImageProcessor
+import com.oadultradeepfield.starseek.domain.repository.SolveRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +17,7 @@ class HistoryViewModel
 @Inject
 constructor(
     private val repository: SolveRepository,
-    private val imageProcessor: ImageProcessorImpl,
+    private val imageProcessor: ImageProcessor,
 ) : ViewModel() {
   private val _uiState = MutableStateFlow<HistoryUiState>(HistoryUiState.Loading)
   val uiState: StateFlow<HistoryUiState> = _uiState

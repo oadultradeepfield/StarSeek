@@ -3,9 +3,9 @@ package com.oadultradeepfield.starseek.ui.upload
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.oadultradeepfield.starseek.data.ImageProcessorImpl
-import com.oadultradeepfield.starseek.data.repository.JobStatus
-import com.oadultradeepfield.starseek.data.repository.SolveRepository
+import com.oadultradeepfield.starseek.domain.model.JobStatus
+import com.oadultradeepfield.starseek.domain.repository.ImageProcessor
+import com.oadultradeepfield.starseek.domain.repository.SolveRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
@@ -23,7 +23,7 @@ class UploadViewModel
 @Inject
 constructor(
     private val repository: SolveRepository,
-    private val imageProcessor: ImageProcessorImpl,
+    private val imageProcessor: ImageProcessor,
 ) : ViewModel() {
   private val _uiState = MutableStateFlow<UploadUiState>(UploadUiState.Empty)
   val uiState: StateFlow<UploadUiState> = _uiState

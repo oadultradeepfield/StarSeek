@@ -6,8 +6,10 @@ import com.oadultradeepfield.starseek.data.local.SolveDao
 import com.oadultradeepfield.starseek.data.mapper.SolveMapper
 import com.oadultradeepfield.starseek.data.remote.StarSeekApi
 import com.oadultradeepfield.starseek.data.remote.dto.JobStatusType
+import com.oadultradeepfield.starseek.domain.model.JobStatus
 import com.oadultradeepfield.starseek.domain.model.ObjectDetail
 import com.oadultradeepfield.starseek.domain.model.Solve
+import com.oadultradeepfield.starseek.domain.repository.SolveRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import okhttp3.MediaType.Companion.toMediaType
