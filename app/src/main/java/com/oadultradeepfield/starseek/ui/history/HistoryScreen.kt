@@ -84,7 +84,7 @@ internal fun HistoryList(
 ) {
   LazyColumn(modifier = Modifier.fillMaxSize().padding(Dimens.screenPadding)) {
     item {
-      Text("$count solved images", style = MaterialTheme.typography.headlineSmall)
+      Text("$count solved image(s)", style = MaterialTheme.typography.headlineSmall)
       Spacer(modifier = Modifier.height(Dimens.spacingLarge))
     }
     items(solves, key = { it.id }) { solve ->
