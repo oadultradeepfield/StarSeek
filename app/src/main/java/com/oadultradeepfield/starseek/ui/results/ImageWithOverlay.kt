@@ -9,6 +9,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -38,7 +40,6 @@ import com.oadultradeepfield.starseek.domain.model.CelestialObject
 import com.oadultradeepfield.starseek.domain.model.ObjectType
 import com.oadultradeepfield.starseek.ui.theme.Dimens
 import com.oadultradeepfield.starseek.ui.theme.StarSeekTheme
-import kotlin.math.min
 
 @Composable
 fun ImageWithOverlay(
@@ -51,6 +52,7 @@ fun ImageWithOverlay(
   var intrinsicWidth by remember { mutableIntStateOf(0) }
   var intrinsicHeight by remember { mutableIntStateOf(0) }
   val infiniteTransition = rememberInfiniteTransition(label = "glow")
+
   val glowAlpha by
       infiniteTransition.animateFloat(
           initialValue = 0.3f,
@@ -58,17 +60,22 @@ fun ImageWithOverlay(
           animationSpec = infiniteRepeatable(tween(800), RepeatMode.Reverse),
           label = "glowAlpha",
       )
+
   val context = LocalContext.current
 
-  Box(modifier = modifier) {
+  val aspectRatio =
+      if (intrinsicWidth > 0 && intrinsicHeight > 0) {
+        intrinsicWidth.toFloat() / intrinsicHeight
+      } else {
+        4f / 3f
+      }
+
+  Box(modifier = modifier.aspectRatio(aspectRatio)) {
     AsyncImage(
         model = ImageRequest.Builder(context).data(imageUri.toUri()).size(Size.ORIGINAL).build(),
         contentDescription = "Star field image showing ${objects.size} celestial objects",
-        modifier =
-            Modifier.fillMaxSize().clip(MaterialTheme.shapes.medium).onGloballyPositioned {
-              displayedSize = it.size
-            },
-        contentScale = ContentScale.Fit,
+        modifier = Modifier.fillMaxSize().onGloballyPositioned { displayedSize = it.size },
+        contentScale = ContentScale.FillWidth,
         onState = { state ->
           if (state is AsyncImagePainter.State.Success) {
             intrinsicWidth = state.result.image.width
@@ -79,8 +86,8 @@ fun ImageWithOverlay(
 
     if (displayedSize != IntSize.Zero && intrinsicWidth > 0 && intrinsicHeight > 0) {
       val transform =
-          remember(displayedSize, intrinsicWidth, intrinsicHeight) {
-            computeCoordinateTransform(displayedSize, intrinsicWidth, intrinsicHeight)
+          remember(displayedSize, intrinsicWidth) {
+            computeCoordinateTransform(displayedSize, intrinsicWidth)
           }
 
       Canvas(modifier = Modifier.fillMaxSize()) {
@@ -89,13 +96,26 @@ fun ImageWithOverlay(
           val py = obj.pixelY ?: return@forEach
           val isHighlighted = obj.name == highlightedName
           val alpha = if (isHighlighted) glowAlpha else 0.7f
-          val radius = if (isHighlighted) 12.dp.toPx() else 8.dp.toPx()
-          val transformedX = px * transform.scale + transform.offsetX
-          val transformedY = py * transform.scale + transform.offsetY
+          val radius = if (isHighlighted) 18.dp.toPx() else 14.dp.toPx()
+          val center =
+              Offset(
+                  (px * transform.scale + transform.offsetX).toFloat(),
+                  (py * transform.scale + transform.offsetY).toFloat(),
+              )
           drawCircle(
-              color = Color.Cyan.copy(alpha = alpha),
+              brush =
+                  Brush.radialGradient(
+                      colors =
+                          listOf(
+                              Color.Cyan.copy(alpha = alpha),
+                              Color.Cyan.copy(alpha = alpha * 0.5f),
+                              Color.Transparent,
+                          ),
+                      center = center,
+                      radius = radius,
+                  ),
               radius = radius,
-              center = Offset(transformedX.toFloat(), transformedY.toFloat()),
+              center = center,
           )
         }
       }
@@ -126,11 +146,22 @@ internal fun ImageOverlayPreviewContent(
         val py = obj.pixelY ?: return@forEach
         val isHighlighted = obj.name == highlightedName
         val alpha = if (isHighlighted) glowAlpha else 0.7f
-        val radius = if (isHighlighted) 12.dp.toPx() else 8.dp.toPx()
+        val radius = if (isHighlighted) 18.dp.toPx() else 14.dp.toPx()
+        val center = Offset(px.toFloat(), py.toFloat())
         drawCircle(
-            color = Color.Cyan.copy(alpha = alpha),
+            brush =
+                Brush.radialGradient(
+                    colors =
+                        listOf(
+                            Color.Cyan.copy(alpha = alpha),
+                            Color.Cyan.copy(alpha = alpha * 0.5f),
+                            Color.Transparent,
+                        ),
+                    center = center,
+                    radius = radius,
+                ),
             radius = radius,
-            center = Offset(px.toFloat(), py.toFloat()),
+            center = center,
         )
       }
     }
@@ -139,20 +170,12 @@ internal fun ImageOverlayPreviewContent(
 
 private data class CoordinateTransform(val scale: Float, val offsetX: Float, val offsetY: Float)
 
-private fun computeCoordinateTransform(
-    displayedSize: IntSize,
-    intrinsicWidth: Int,
-    intrinsicHeight: Int,
-): CoordinateTransform {
-  val scaleX = displayedSize.width.toFloat() / intrinsicWidth
-  val scaleY = displayedSize.height.toFloat() / intrinsicHeight
-  val scale = min(scaleX, scaleY)
-  val scaledWidth = intrinsicWidth * scale
-  val scaledHeight = intrinsicHeight * scale
-  val offsetX = (displayedSize.width - scaledWidth) / 2f
-  val offsetY = (displayedSize.height - scaledHeight) / 2f
-  return CoordinateTransform(scale, offsetX, offsetY)
-}
+private fun computeCoordinateTransform(displayedSize: IntSize, intrinsicWidth: Int) =
+    CoordinateTransform(
+        scale = displayedSize.width.toFloat() / intrinsicWidth,
+        offsetX = 0f,
+        offsetY = 0f,
+    )
 
 @Preview(showBackground = true)
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)

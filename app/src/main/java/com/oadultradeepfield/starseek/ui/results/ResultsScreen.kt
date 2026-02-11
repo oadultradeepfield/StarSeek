@@ -2,33 +2,33 @@ package com.oadultradeepfield.starseek.ui.results
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import com.oadultradeepfield.starseek.domain.model.CelestialObject
 import com.oadultradeepfield.starseek.domain.model.ObjectType
@@ -37,6 +37,7 @@ import com.oadultradeepfield.starseek.ui.components.ErrorState
 import com.oadultradeepfield.starseek.ui.components.LoadingIndicator
 import com.oadultradeepfield.starseek.ui.theme.Dimens
 import com.oadultradeepfield.starseek.ui.theme.StarSeekTheme
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,33 +47,35 @@ fun ResultsScreen(viewModel: ResultsViewModel, solveId: Long, onNavigateBack: ()
 
   LaunchedEffect(solveId) { viewModel.loadFromId(solveId) }
 
-  Scaffold(
-      topBar = {
-        TopAppBar(
-            title = { Text("Results") },
-            navigationIcon = {
-              IconButton(onClick = onNavigateBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Navigate back")
-              }
-            },
-        )
-      },
-  ) { innerPadding ->
+  Column(modifier = Modifier.fillMaxSize()) {
+    TopAppBar(
+        title = { Text("Results") },
+        navigationIcon = {
+          IconButton(onClick = onNavigateBack) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Navigate back")
+          }
+        },
+        windowInsets = WindowInsets(0, 0, 0, 0),
+    )
     when (val state = uiState) {
-      is ResultsUiState.Loading -> LoadingIndicator(Modifier.fillMaxSize().padding(innerPadding))
+      is ResultsUiState.Loading -> LoadingIndicator(Modifier.fillMaxSize())
       is ResultsUiState.Content ->
           ResultsContent(
               solve = state.solve,
               grouped = state.grouped,
               highlightedName = state.highlightedObjectName,
-              onObjectClick = viewModel::onObjectClick,
-              modifier = Modifier.padding(innerPadding),
+              objectDetailState = objectDetailState,
+              onObjectClick = { name ->
+                if (state.highlightedObjectName == name) {
+                  viewModel.dismissObjectDetail()
+                } else {
+                  viewModel.onObjectClick(name)
+                }
+              },
           )
       is ResultsUiState.Error -> ErrorState(message = state.message)
     }
   }
-
-  ObjectDetailSheet(state = objectDetailState, onDismiss = viewModel::dismissObjectDetail)
 }
 
 @Composable
@@ -80,72 +83,128 @@ internal fun ResultsContent(
     solve: Solve,
     grouped: GroupedObjects,
     highlightedName: String?,
+    objectDetailState: ObjectDetailState,
     onObjectClick: (String) -> Unit,
     modifier: Modifier = Modifier,
     imageSlot: (@Composable () -> Unit)? = null,
 ) {
-  LazyColumn(modifier = modifier.fillMaxSize().padding(Dimens.screenPadding)) {
-    item {
-      if (imageSlot != null) {
-        imageSlot()
-      } else {
-        ImageWithOverlay(
-            imageUri = solve.imageUri,
-            objects = solve.objects.filter { it.pixelX != null },
-            highlightedName = highlightedName,
-            modifier = Modifier.fillMaxWidth().height(Dimens.imagePreviewHeight),
-        )
+  val listState = rememberLazyListState()
+
+  Column(modifier = modifier.fillMaxSize()) {
+    if (imageSlot != null) {
+      imageSlot()
+    } else {
+      ImageWithOverlay(
+          imageUri = solve.imageUri,
+          objects = solve.objects.filter { it.pixelX != null },
+          highlightedName = highlightedName,
+          modifier = Modifier.fillMaxWidth(),
+      )
+    }
+    ObjectList(
+        grouped = grouped,
+        objectCount = solve.objects.size,
+        highlightedName = highlightedName,
+        objectDetailState = objectDetailState,
+        onObjectClick = onObjectClick,
+        listState = listState,
+        modifier = Modifier.weight(1f),
+    )
+  }
+}
+
+@Composable
+private fun ObjectList(
+    grouped: GroupedObjects,
+    objectCount: Int,
+    highlightedName: String?,
+    objectDetailState: ObjectDetailState,
+    onObjectClick: (String) -> Unit,
+    listState: LazyListState,
+    modifier: Modifier = Modifier,
+) {
+  val coroutineScope = rememberCoroutineScope()
+  val horizontalPadding = Modifier.padding(horizontal = Dimens.screenPadding)
+  var itemIndex = 0
+  val objectIndexMap = mutableMapOf<String, Int>()
+
+  itemIndex++
+  grouped.byConstellation.entries.forEachIndexed { constellationIndex, (_, typeMap) ->
+    if (constellationIndex > 0) itemIndex++
+    itemIndex++
+    typeMap.entries.forEachIndexed { typeIndex, (_, objects) ->
+      if (typeIndex > 0) itemIndex++
+      itemIndex++
+      objects.forEach { obj ->
+        objectIndexMap[obj.name] = itemIndex
+        itemIndex++
       }
+    }
+  }
+
+  LaunchedEffect(highlightedName) {
+    if (highlightedName != null) {
+      val index = objectIndexMap[highlightedName]
+      if (index != null) {
+        coroutineScope.launch { listState.animateScrollToItem(index) }
+      }
+    }
+  }
+
+  LazyColumn(
+      modifier = modifier.fillMaxWidth(),
+      state = listState,
+      contentPadding = PaddingValues(bottom = Dimens.screenPadding),
+  ) {
+    item {
       Spacer(modifier = Modifier.height(Dimens.spacingXLarge))
-      Text("${solve.objects.size} objects detected", style = MaterialTheme.typography.headlineSmall)
+      Text(
+          "$objectCount objects detected",
+          style = MaterialTheme.typography.headlineSmall,
+          modifier = horizontalPadding,
+      )
       Spacer(modifier = Modifier.height(Dimens.spacingLarge))
     }
 
-    grouped.byConstellation.forEach { (constellation, typeMap) ->
+    grouped.byConstellation.entries.forEachIndexed { index, (constellation, typeMap) ->
+      if (index > 0) {
+        item { Spacer(modifier = Modifier.height(Dimens.spacingLarge)) }
+      }
+
       item {
         Text(
             constellation,
             style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(vertical = Dimens.spacingSmall),
+            modifier = horizontalPadding.padding(vertical = Dimens.spacingSmall),
         )
       }
 
-      typeMap.forEach { (type, objects) ->
+      typeMap.entries.forEachIndexed { typeIndex, (type, objects) ->
+        if (typeIndex > 0) {
+          item { Spacer(modifier = Modifier.height(Dimens.spacingMedium)) }
+        }
+
         item {
           Text(
               type.displayName,
               style = MaterialTheme.typography.titleMedium,
               color = MaterialTheme.colorScheme.primary,
-              modifier =
-                  Modifier.padding(
-                      vertical = Dimens.spacingXSmall,
-                      horizontal = Dimens.spacingSmall,
-                  ),
+              modifier = horizontalPadding.padding(vertical = Dimens.spacingXSmall),
           )
         }
 
-        items(objects) { obj -> ObjectItem(obj = obj, onClick = { onObjectClick(obj.name) }) }
+        items(objects, key = { it.name }) { obj ->
+          val isExpanded = obj.name == highlightedName
+          ObjectAccordionItem(
+              obj = obj,
+              isExpanded = isExpanded,
+              detailState = if (isExpanded) objectDetailState else ObjectDetailState.Hidden,
+              onClick = { onObjectClick(obj.name) },
+              modifier = horizontalPadding,
+          )
+        }
       }
     }
-  }
-}
-
-@Composable
-internal fun ObjectItem(obj: CelestialObject, onClick: () -> Unit) {
-  Card(
-      modifier =
-          Modifier.fillMaxWidth()
-              .padding(vertical = Dimens.spacingXSmall, horizontal = Dimens.spacingSmall)
-              .clickable(onClick = onClick)
-              .semantics {
-                contentDescription = "${obj.name}, ${obj.type.displayName} in ${obj.constellation}"
-              },
-  ) {
-    Text(
-        obj.name,
-        style = MaterialTheme.typography.bodyLarge,
-        modifier = Modifier.padding(Dimens.listItemPadding),
-    )
   }
 }
 
@@ -189,27 +248,15 @@ private fun ResultsContentPreview() {
             ),
         grouped = grouped,
         highlightedName = null,
+        objectDetailState = ObjectDetailState.Hidden,
         onObjectClick = {},
         imageSlot = {
           Box(
               Modifier.fillMaxWidth()
                   .height(Dimens.imagePreviewHeight)
-                  .clip(MaterialTheme.shapes.medium)
                   .background(MaterialTheme.colorScheme.surfaceVariant)
           )
         },
-    )
-  }
-}
-
-@Preview(showBackground = true)
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun ObjectItemPreview() {
-  StarSeekTheme(dynamicColor = false) {
-    ObjectItem(
-        obj = CelestialObject("Betelgeuse", ObjectType.STAR, "Orion"),
-        onClick = {},
     )
   }
 }

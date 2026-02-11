@@ -19,6 +19,7 @@ object Dimens {
   val thumbnailSizeLarge = 300.dp
   val imagePreviewHeight = 250.dp
   val loadingIndicatorSizeSmall = 20.dp
+  val loadingIndicatorSizeMedium = 32.dp
   val loadingIndicatorSize = 48.dp
-  val bottomSheetMinHeight = 200.dp
+  val bottomSheetMinHeight = 96.dp
 }
