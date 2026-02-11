@@ -47,7 +47,6 @@ constructor(
 
       solve?.let {
         imageProcessor.deleteImage(it.imageUri.toUri())
-        imageProcessor.deleteImage(it.annotatedImageUri.toUri())
         repository.deleteSolve(id)
       }
 

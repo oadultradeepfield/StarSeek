@@ -11,7 +11,6 @@ sealed class ResultsUiState {
   data class Content(
       val solve: Solve,
       val grouped: GroupedObjects,
-      val showAnnotated: Boolean = false,
       val highlightedObjectName: String? = null,
   ) : ResultsUiState()
 

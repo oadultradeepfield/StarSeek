@@ -100,14 +100,8 @@ constructor(
                   when (status) {
                     is JobStatus.Processing -> {}
                     is JobStatus.Success -> {
-                      val annotatedUri = imageProcessor.downloadAndSave(status.annotatedImageUrl)
                       val solve =
-                          status.solve.copy(
-                              imageUri = imageUri.toString(),
-                              annotatedImageUri = annotatedUri.toString(),
-                              imageHash = imageHash,
-                          )
-
+                          status.solve.copy(imageUri = imageUri.toString(), imageHash = imageHash)
                       val id = repository.saveSolve(solve)
                       _uiState.update { UploadUiState.Success(solve.copy(id = id)) }
                       return@launch

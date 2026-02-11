@@ -68,7 +68,11 @@ fun StarSeekNavHost(navController: NavHostController, modifier: Modifier = Modif
 
     composable<NavRoutes.Results> { backStackEntry ->
       val route = backStackEntry.toRoute<NavRoutes.Results>()
-      ResultsScreen(viewModel = hiltViewModel(), solveId = route.solveId)
+      ResultsScreen(
+          viewModel = hiltViewModel(),
+          solveId = route.solveId,
+          onNavigateBack = { navController.popBackStack() },
+      )
     }
   }
 }
