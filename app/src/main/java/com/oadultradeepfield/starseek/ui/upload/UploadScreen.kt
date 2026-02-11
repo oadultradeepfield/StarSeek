@@ -8,13 +8,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -80,7 +86,7 @@ internal fun ImageSelectedState(uri: Uri, onUploadClick: () -> Unit, onChangeCli
         AsyncImage(
             model = uri,
             contentDescription = "Selected image",
-            modifier = Modifier.size(Dimens.thumbnailSizeLarge).clip(MaterialTheme.shapes.medium),
+            modifier = Modifier.size(Dimens.thumbnailSizeLarge).clip(MaterialTheme.shapes.large),
             contentScale = ContentScale.Crop,
         )
       },
@@ -98,13 +104,31 @@ private fun ImageSelectedContent(
   Column(
       modifier = Modifier.fillMaxSize().padding(Dimens.screenPadding),
       horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.Center,
   ) {
     image()
     Spacer(modifier = Modifier.height(Dimens.spacingXLarge))
-    Button(onClick = onUploadClick, modifier = Modifier.fillMaxWidth()) { Text("Identify Stars") }
-    Spacer(modifier = Modifier.height(Dimens.spacingSmall))
+
+    Button(onClick = onUploadClick, modifier = Modifier.fillMaxWidth()) {
+      Icon(
+          imageVector = Icons.Default.Search,
+          contentDescription = null,
+          modifier = Modifier.size(Dimens.spacingLarge),
+      )
+      Spacer(modifier = Modifier.width(Dimens.spacingMedium))
+      Text(text = "Identify Stars", style = MaterialTheme.typography.labelLarge)
+    }
+
+    Spacer(modifier = Modifier.height(Dimens.spacingXSmall))
+
     OutlinedButton(onClick = onChangeClick, modifier = Modifier.fillMaxWidth()) {
-      Text("Change Photo")
+      Icon(
+          imageVector = Icons.Default.Edit,
+          contentDescription = null,
+          modifier = Modifier.size(Dimens.spacingLarge),
+      )
+      Spacer(modifier = Modifier.width(Dimens.spacingMedium))
+      Text(text = "Change Photo", style = MaterialTheme.typography.labelLarge)
     }
   }
 }
@@ -116,7 +140,7 @@ internal fun LoadingState(uri: Uri, message: String) {
         AsyncImage(
             model = uri,
             contentDescription = "Processing image",
-            modifier = Modifier.size(Dimens.thumbnailSizeMedium).clip(MaterialTheme.shapes.medium),
+            modifier = Modifier.size(Dimens.thumbnailSizeLarge).clip(MaterialTheme.shapes.large),
             contentScale = ContentScale.Crop,
         )
       },
@@ -132,10 +156,18 @@ private fun LoadingStateContent(image: @Composable () -> Unit, message: String) 
       verticalArrangement = Arrangement.Center,
   ) {
     image()
+
     Spacer(modifier = Modifier.height(Dimens.spacingXLarge))
-    LoadingIndicator(Modifier.size(Dimens.loadingIndicatorSize))
-    Spacer(modifier = Modifier.height(Dimens.spacingLarge))
-    Text(message, style = MaterialTheme.typography.bodyLarge)
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+      LoadingIndicator(Modifier.size(Dimens.loadingIndicatorSizeSmall))
+      Spacer(modifier = Modifier.width(Dimens.spacingMedium))
+      Text(message, style = MaterialTheme.typography.bodyLarge)
+    }
   }
 }
 
@@ -166,8 +198,8 @@ private fun LoadingStatePreview() {
     LoadingStateContent(
         image = {
           Box(
-              Modifier.size(Dimens.thumbnailSizeMedium)
-                  .clip(MaterialTheme.shapes.medium)
+              Modifier.size(Dimens.thumbnailSizeLarge)
+                  .clip(MaterialTheme.shapes.large)
                   .background(MaterialTheme.colorScheme.surfaceVariant)
           )
         },
