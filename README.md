@@ -44,11 +44,7 @@ stars, nebulae, galaxies, and star clusters visible in the frame.
 
 ### Screenshots
 
-<div align="center">
-  <img src="assets/screenshot1.png" alt="screenshot" width="200" />
-  <img src="assets/screenshot2.png" alt="screenshot" width="200" />
-  <img src="assets/screenshot3.png" alt="screenshot" width="200" />
-</div>
+![screenshots](demo.jpg)
 
 ### Tech Stack
 
