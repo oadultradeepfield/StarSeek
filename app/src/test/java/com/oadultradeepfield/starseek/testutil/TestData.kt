@@ -11,7 +11,6 @@ object TestData {
   fun createSolveEntity(
       id: Long = 1L,
       imageUri: String = "file:///images/image.jpg",
-      annotatedImageUri: String = "file:///images/annotated.jpg",
       imageHash: String = "abc123",
       objectsJson: String = "[]",
       objectCount: Int = 1,
@@ -20,7 +19,6 @@ object TestData {
       SolveEntity(
           id = id,
           imageUri = imageUri,
-          annotatedImageUri = annotatedImageUri,
           imageHash = imageHash,
           objectsJson = objectsJson,
           objectCount = objectCount,
@@ -30,7 +28,6 @@ object TestData {
   fun createSolve(
       id: Long = 1L,
       imageUri: String = "file:///images/image.jpg",
-      annotatedImageUri: String = "file:///images/annotated.jpg",
       imageHash: String = "abc123",
       objects: List<CelestialObject> = listOf(createCelestialObject()),
       timestamp: Long = 1700000000000L,
@@ -38,7 +35,6 @@ object TestData {
       Solve(
           id = id,
           imageUri = imageUri,
-          annotatedImageUri = annotatedImageUri,
           imageHash = imageHash,
           objects = objects,
           timestamp = timestamp,
@@ -74,8 +70,6 @@ object TestData {
           pixelY = pixelY,
       )
 
-  fun createSolveResult(
-      annotatedImageUrl: String = "https://api.example.com/annotated.jpg",
-      objects: List<CelestialObjectDto> = listOf(createCelestialObjectDto()),
-  ) = SolveResult(annotatedImageUrl = annotatedImageUrl, objects = objects)
+  fun createSolveResult(objects: List<CelestialObjectDto> = listOf(createCelestialObjectDto())) =
+      SolveResult(objects = objects)
 }

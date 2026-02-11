@@ -103,7 +103,6 @@ class SolveRepositoryImplTest {
 
     val status = result.getOrNull() as JobStatus.Success
     assertEquals(solve, status.solve)
-    assertEquals("https://api.example.com/annotated.jpg", status.annotatedImageUrl)
   }
 
   @Test

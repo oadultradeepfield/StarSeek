@@ -15,7 +15,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -76,34 +75,6 @@ class ResultsViewModelTest {
     testDispatcher.scheduler.advanceUntilIdle()
 
     viewModel.uiState.test { assertEquals(ResultsUiState.Error("Solve not found"), awaitItem()) }
-  }
-
-  @Test
-  fun `toggleImageView toggles showAnnotated between true and false`() = runTest {
-    val solve = TestData.createSolve(objects = emptyList())
-    coEvery { repository.getSolveById(1L) } returns solve
-
-    viewModel.loadFromId(1L)
-    testDispatcher.scheduler.advanceUntilIdle()
-
-    viewModel.uiState.test {
-      val initial = awaitItem() as ResultsUiState.Content
-      assertFalse(initial.showAnnotated)
-    }
-
-    viewModel.toggleImageView()
-
-    viewModel.uiState.test {
-      val toggled = awaitItem() as ResultsUiState.Content
-      assertTrue(toggled.showAnnotated)
-    }
-
-    viewModel.toggleImageView()
-
-    viewModel.uiState.test {
-      val toggledBack = awaitItem() as ResultsUiState.Content
-      assertFalse(toggledBack.showAnnotated)
-    }
   }
 
   @Test

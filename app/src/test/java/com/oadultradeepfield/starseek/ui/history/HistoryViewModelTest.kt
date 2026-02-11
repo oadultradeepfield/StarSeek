@@ -91,22 +91,14 @@ class HistoryViewModelTest {
   }
 
   @Test
-  fun `onDeleteConfirm deletes solve and images then clears deleteConfirmId`() = runTest {
+  fun `onDeleteConfirm deletes solve and image then clears deleteConfirmId`() = runTest {
     val imageUri = mockk<Uri>()
-    val annotatedUri = mockk<Uri>()
-    val solve =
-        TestData.createSolve(
-            id = 1,
-            imageUri = "file:///image.jpg",
-            annotatedImageUri = "file:///annotated.jpg",
-        )
+    val solve = TestData.createSolve(id = 1, imageUri = "file:///image.jpg")
 
     every { repository.getAllSolves() } returns flowOf(listOf(solve))
     coEvery { repository.getSolveById(1L) } returns solve
     every { Uri.parse("file:///image.jpg") } returns imageUri
-    every { Uri.parse("file:///annotated.jpg") } returns annotatedUri
     every { imageProcessor.deleteImage(imageUri) } returns Unit
-    every { imageProcessor.deleteImage(annotatedUri) } returns Unit
     coEvery { repository.deleteSolve(1L) } returns Unit
 
     val viewModel = HistoryViewModel(repository, imageProcessor)
@@ -117,7 +109,6 @@ class HistoryViewModelTest {
     testDispatcher.scheduler.advanceUntilIdle()
 
     coVerify { imageProcessor.deleteImage(imageUri) }
-    coVerify { imageProcessor.deleteImage(annotatedUri) }
     coVerify { repository.deleteSolve(1L) }
 
     viewModel.deleteConfirmId.test { assertNull(awaitItem()) }

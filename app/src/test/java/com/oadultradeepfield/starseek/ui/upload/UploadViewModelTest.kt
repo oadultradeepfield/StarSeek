@@ -105,9 +105,7 @@ class UploadViewModelTest {
     coEvery { imageProcessor.copyToInternalStorage(imageBytes) } returns internalUri
     coEvery { imageProcessor.compressForUpload(imageBytes) } returns imageBytes
     coEvery { repository.uploadImage(imageBytes, "image.jpg") } returns Result.success("job-123")
-    coEvery { repository.getJobStatus("job-123") } returns
-        Result.success(JobStatus.Success(solve, "https://example.com/annotated.jpg"))
-    coEvery { imageProcessor.downloadAndSave(any()) } returns internalUri
+    coEvery { repository.getJobStatus("job-123") } returns Result.success(JobStatus.Success(solve))
     coEvery { repository.saveSolve(any()) } returns 1L
 
     viewModel.onImageSelected(uri)
@@ -144,10 +142,9 @@ class UploadViewModelTest {
   }
 
   @Test
-  fun `polling on JobStatus Success downloads annotated image and saves solve`() = runTest {
+  fun `polling on JobStatus Success saves solve`() = runTest {
     val uri = createUri()
     val internalUri = createUri("file:///internal/image.jpg")
-    val annotatedUri = createUri("file:///internal/annotated.jpg")
     val imageBytes = byteArrayOf(1, 2, 3)
     val solve = TestData.createSolve(id = 0)
 
@@ -157,10 +154,7 @@ class UploadViewModelTest {
     coEvery { imageProcessor.copyToInternalStorage(imageBytes) } returns internalUri
     coEvery { imageProcessor.compressForUpload(imageBytes) } returns imageBytes
     coEvery { repository.uploadImage(imageBytes, "image.jpg") } returns Result.success("job-123")
-    coEvery { repository.getJobStatus("job-123") } returns
-        Result.success(JobStatus.Success(solve, "https://example.com/annotated.jpg"))
-    coEvery { imageProcessor.downloadAndSave("https://example.com/annotated.jpg") } returns
-        annotatedUri
+    coEvery { repository.getJobStatus("job-123") } returns Result.success(JobStatus.Success(solve))
     coEvery { repository.saveSolve(any()) } returns 42L
 
     viewModel.onImageSelected(uri)

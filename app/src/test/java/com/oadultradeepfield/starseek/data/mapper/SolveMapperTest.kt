@@ -25,7 +25,6 @@ class SolveMapperTest {
         TestData.createSolveEntity(
             id = 42,
             imageUri = "content://image",
-            annotatedImageUri = "content://annotated",
             imageHash = "abc123",
             objectsJson = json.encodeToString(objects),
             objectCount = 1,
@@ -36,7 +35,6 @@ class SolveMapperTest {
 
     assertEquals(42L, result.id)
     assertEquals("content://image", result.imageUri)
-    assertEquals("content://annotated", result.annotatedImageUri)
     assertEquals("abc123", result.imageHash)
     assertEquals(1000L, result.timestamp)
     assertEquals(1, result.objects.size)
@@ -59,7 +57,6 @@ class SolveMapperTest {
         TestData.createSolve(
             id = 1,
             imageUri = "uri1",
-            annotatedImageUri = "uri2",
             imageHash = "hash123",
             objects = objects,
             timestamp = 2000L,
@@ -68,7 +65,6 @@ class SolveMapperTest {
     val result = mapper.mapToEntity(solve)
 
     assertEquals("uri1", result.imageUri)
-    assertEquals("uri2", result.annotatedImageUri)
     assertEquals("hash123", result.imageHash)
     assertEquals(2000L, result.timestamp)
     assertEquals(2, result.objectCount)
@@ -77,7 +73,7 @@ class SolveMapperTest {
   }
 
   @Test
-  fun `mapToDomain from SolveResult creates solve with empty URIs and hash`() {
+  fun `mapToDomain from SolveResult creates solve with empty URI and hash`() {
     val solveResult =
         TestData.createSolveResult(
             objects =
@@ -94,7 +90,6 @@ class SolveMapperTest {
     val result = mapper.mapToDomain(solveResult)
 
     assertEquals("", result.imageUri)
-    assertEquals("", result.annotatedImageUri)
     assertEquals("", result.imageHash)
     assertEquals(1, result.objects.size)
     assertEquals("Polaris", result.objects[0].name)
