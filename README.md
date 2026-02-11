@@ -95,6 +95,8 @@ stars, nebulae, galaxies, and star clusters visible in the frame.
 │   │   └── model/          # Domain models
 │   ├── di/                 # Hilt dependency injection modules
 │   └── ui/
+│       ├── components/     # Shared UI components
+│       ├── theme/          # Material Design 3 theming
 │       ├── upload/         # Image upload screen
 │       ├── results/        # Solve results screen
 │       ├── history/        # History screen
