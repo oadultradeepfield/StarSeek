@@ -1,5 +1,7 @@
 package com.oadultradeepfield.starseek.data.repository
 
+import com.oadultradeepfield.starseek.data.local.ObjectDetailDao
+import com.oadultradeepfield.starseek.data.local.ObjectDetailEntity
 import com.oadultradeepfield.starseek.data.local.SolveDao
 import com.oadultradeepfield.starseek.data.mapper.SolveMapper
 import com.oadultradeepfield.starseek.data.remote.StarSeekApi
@@ -18,6 +20,7 @@ class SolveRepositoryImpl
 constructor(
     private val api: StarSeekApi,
     private val dao: SolveDao,
+    private val objectDetailDao: ObjectDetailDao,
     private val mapper: SolveMapper,
 ) : SolveRepository {
   override suspend fun getCachedSolve(imageHash: String): Solve? =
@@ -60,8 +63,24 @@ constructor(
   override suspend fun deleteSolve(id: Long) = dao.deleteById(id)
 
   override suspend fun getObjectDetail(objectName: String): Result<ObjectDetail> = runCatching {
+    val cached = objectDetailDao.getByName(objectName)
+    if (cached != null) {
+      return@runCatching ObjectDetail(
+          name = cached.name,
+          type = mapper.mapToObjectType(cached.type),
+          constellation = cached.constellation,
+          funFact = cached.funFact,
+      )
+    }
     val response = api.getObjectDetail(objectName)
-
+    objectDetailDao.insert(
+        ObjectDetailEntity(
+            name = response.name,
+            type = response.type,
+            constellation = response.constellation,
+            funFact = response.funFact,
+        )
+    )
     ObjectDetail(
         name = response.name,
         type = mapper.mapToObjectType(response.type),

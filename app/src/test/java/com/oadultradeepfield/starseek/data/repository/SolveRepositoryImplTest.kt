@@ -1,5 +1,7 @@
 package com.oadultradeepfield.starseek.data.repository
 
+import com.oadultradeepfield.starseek.data.local.ObjectDetailDao
+import com.oadultradeepfield.starseek.data.local.ObjectDetailEntity
 import com.oadultradeepfield.starseek.data.local.SolveDao
 import com.oadultradeepfield.starseek.data.mapper.SolveMapper
 import com.oadultradeepfield.starseek.data.remote.StarSeekApi
@@ -25,6 +27,7 @@ import org.junit.Test
 class SolveRepositoryImplTest {
   private lateinit var api: StarSeekApi
   private lateinit var dao: SolveDao
+  private lateinit var objectDetailDao: ObjectDetailDao
   private lateinit var mapper: SolveMapper
   private lateinit var repository: SolveRepositoryImpl
 
@@ -32,8 +35,9 @@ class SolveRepositoryImplTest {
   fun setup() {
     api = mockk()
     dao = mockk()
+    objectDetailDao = mockk()
     mapper = mockk()
-    repository = SolveRepositoryImpl(api, dao, mapper)
+    repository = SolveRepositoryImpl(api, dao, objectDetailDao, mapper)
   }
 
   @Test
@@ -183,26 +187,46 @@ class SolveRepositoryImplTest {
   }
 
   @Test
-  fun `getObjectDetail returns mapped ObjectDetail on success`() = runTest {
-    val response = ObjectDetailResponse("Sirius", "star", "Canis Major", "Brightest star")
+  fun `getObjectDetail returns cached result on cache hit`() = runTest {
+    val cached = ObjectDetailEntity("Sirius", "star", "Canis Major", "Brightest star")
 
-    coEvery { api.getObjectDetail("Sirius") } returns response
+    coEvery { objectDetailDao.getByName("Sirius") } returns cached
     every { mapper.mapToObjectType("star") } returns ObjectType.STAR
 
     val result = repository.getObjectDetail("Sirius")
 
     assertTrue(result.isSuccess)
-
     val detail = result.getOrNull()!!
-
     assertEquals("Sirius", detail.name)
     assertEquals(ObjectType.STAR, detail.type)
     assertEquals("Canis Major", detail.constellation)
     assertEquals("Brightest star", detail.funFact)
+    coVerify(exactly = 0) { api.getObjectDetail(any()) }
+  }
+
+  @Test
+  fun `getObjectDetail fetches from API and caches on cache miss`() = runTest {
+    val response = ObjectDetailResponse("Sirius", "star", "Canis Major", "Brightest star")
+
+    coEvery { objectDetailDao.getByName("Sirius") } returns null
+    coEvery { api.getObjectDetail("Sirius") } returns response
+    coEvery { objectDetailDao.insert(any()) } returns Unit
+    every { mapper.mapToObjectType("star") } returns ObjectType.STAR
+
+    val result = repository.getObjectDetail("Sirius")
+
+    assertTrue(result.isSuccess)
+    val detail = result.getOrNull()!!
+    assertEquals("Sirius", detail.name)
+    assertEquals(ObjectType.STAR, detail.type)
+    assertEquals("Canis Major", detail.constellation)
+    assertEquals("Brightest star", detail.funFact)
+    coVerify { objectDetailDao.insert(match { it.name == "Sirius" }) }
   }
 
   @Test
   fun `getObjectDetail returns failure on exception`() = runTest {
+    coEvery { objectDetailDao.getByName("Unknown") } returns null
     coEvery { api.getObjectDetail("Unknown") } throws RuntimeException("Not found")
     val result = repository.getObjectDetail("Unknown")
     assertTrue(result.isFailure)
