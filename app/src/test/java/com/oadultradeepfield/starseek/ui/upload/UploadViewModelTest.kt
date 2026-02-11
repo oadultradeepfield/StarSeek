@@ -54,18 +54,18 @@ class UploadViewModelTest {
   }
 
   @Test
-  fun `onImageSelected updates state to ImageSelected`() = runTest {
+  fun `onImagesSelected updates state to ImagesSelected`() = runTest {
     val uri = createUri()
-    viewModel.onImageSelected(uri)
+    viewModel.onImagesSelected(listOf(uri))
 
     viewModel.uiState.test {
-      val state = awaitItem() as UploadUiState.ImageSelected
-      assertEquals(uri, state.uri)
+      val state = awaitItem() as UploadUiState.ImagesSelected
+      assertEquals(listOf(uri), state.uris)
     }
   }
 
   @Test
-  fun `onUploadClick does nothing when state is not ImageSelected`() = runTest {
+  fun `onUploadClick does nothing when state is not ImagesSelected`() = runTest {
     viewModel.onUploadClick()
     testDispatcher.scheduler.advanceUntilIdle()
 
@@ -82,13 +82,13 @@ class UploadViewModelTest {
     every { imageProcessor.computeHash(imageBytes) } returns "hash123"
     coEvery { repository.getCachedSolve("hash123") } returns cachedSolve
 
-    viewModel.onImageSelected(uri)
+    viewModel.onImagesSelected(listOf(uri))
     viewModel.onUploadClick()
     testDispatcher.scheduler.advanceUntilIdle()
 
     viewModel.uiState.test {
       val state = awaitItem() as UploadUiState.Success
-      assertEquals(cachedSolve, state.solve)
+      assertEquals(listOf(cachedSolve.id), state.solveIds)
     }
   }
 
@@ -108,7 +108,7 @@ class UploadViewModelTest {
     coEvery { repository.getJobStatus("job-123") } returns Result.success(JobStatus.Success(solve))
     coEvery { repository.saveSolve(any()) } returns 1L
 
-    viewModel.onImageSelected(uri)
+    viewModel.onImagesSelected(listOf(uri))
     viewModel.onUploadClick()
     testDispatcher.scheduler.runCurrent()
 
@@ -117,7 +117,7 @@ class UploadViewModelTest {
   }
 
   @Test
-  fun `upload failure emits Error with message and lastUri`() = runTest {
+  fun `upload failure emits Error with message and lastUris`() = runTest {
     val uri = createUri()
     val internalUri = createUri("file:///internal/image.jpg")
     val imageBytes = byteArrayOf(1, 2, 3)
@@ -130,14 +130,14 @@ class UploadViewModelTest {
     coEvery { repository.uploadImage(imageBytes, "image.jpg") } returns
         Result.failure(RuntimeException("Network error"))
 
-    viewModel.onImageSelected(uri)
+    viewModel.onImagesSelected(listOf(uri))
     viewModel.onUploadClick()
     testDispatcher.scheduler.advanceUntilIdle()
 
     viewModel.uiState.test {
       val state = awaitItem() as UploadUiState.Error
       assertEquals("Network error", state.message)
-      assertEquals(uri, state.lastUri)
+      assertEquals(listOf(uri), state.lastUris)
     }
   }
 
@@ -157,7 +157,7 @@ class UploadViewModelTest {
     coEvery { repository.getJobStatus("job-123") } returns Result.success(JobStatus.Success(solve))
     coEvery { repository.saveSolve(any()) } returns 42L
 
-    viewModel.onImageSelected(uri)
+    viewModel.onImagesSelected(listOf(uri))
     viewModel.onUploadClick()
     testDispatcher.scheduler.advanceUntilIdle()
     advanceTimeBy(6000)
@@ -165,7 +165,7 @@ class UploadViewModelTest {
 
     viewModel.uiState.test {
       val state = awaitItem() as UploadUiState.Success
-      assertEquals(42L, state.solve.id)
+      assertEquals(listOf(42L), state.solveIds)
     }
   }
 
@@ -184,7 +184,7 @@ class UploadViewModelTest {
     coEvery { repository.getJobStatus("job-123") } returns
         Result.success(JobStatus.Failed("Image too dark"))
 
-    viewModel.onImageSelected(uri)
+    viewModel.onImagesSelected(listOf(uri))
     viewModel.onUploadClick()
     testDispatcher.scheduler.advanceUntilIdle()
     advanceTimeBy(6000)
@@ -202,7 +202,7 @@ class UploadViewModelTest {
 
     coEvery { imageProcessor.readBytes(uri) } throws RuntimeException("Cannot read image")
 
-    viewModel.onImageSelected(uri)
+    viewModel.onImagesSelected(listOf(uri))
     viewModel.onUploadClick()
     testDispatcher.scheduler.advanceUntilIdle()
 
@@ -221,7 +221,7 @@ class UploadViewModelTest {
   }
 
   @Test
-  fun `retry restarts upload from lastUri when in Error state`() = runTest {
+  fun `retry restarts upload from lastUris when in Error state`() = runTest {
     val uri = createUri()
     val cachedSolve = TestData.createSolve()
     val imageBytes = byteArrayOf(1, 2, 3)
@@ -232,7 +232,7 @@ class UploadViewModelTest {
     every { imageProcessor.computeHash(imageBytes) } returns "hash123"
     coEvery { repository.getCachedSolve("hash123") } returns cachedSolve
 
-    viewModel.onImageSelected(uri)
+    viewModel.onImagesSelected(listOf(uri))
     viewModel.onUploadClick()
     testDispatcher.scheduler.advanceUntilIdle()
 
@@ -243,17 +243,88 @@ class UploadViewModelTest {
 
     viewModel.uiState.test {
       val state = awaitItem() as UploadUiState.Success
-      assertEquals(cachedSolve, state.solve)
+      assertEquals(listOf(cachedSolve.id), state.solveIds)
     }
   }
 
   @Test
   fun `reset sets state to Empty`() = runTest {
     val uri = createUri()
-    viewModel.onImageSelected(uri)
+    viewModel.onImagesSelected(listOf(uri))
 
     viewModel.reset()
 
     viewModel.uiState.test { assertEquals(UploadUiState.Empty, awaitItem()) }
+  }
+
+  @Test
+  fun `multiple images upload processes in parallel`() = runTest {
+    val uri1 = createUri("file:///test/image1.jpg")
+    val uri2 = createUri("file:///test/image2.jpg")
+    val cachedSolve1 = TestData.createSolve(id = 1)
+    val cachedSolve2 = TestData.createSolve(id = 2)
+    val imageBytes = byteArrayOf(1, 2, 3)
+
+    coEvery { imageProcessor.readBytes(uri1) } returns imageBytes
+    coEvery { imageProcessor.readBytes(uri2) } returns imageBytes
+    every { imageProcessor.computeHash(imageBytes) } returns "hash1" andThen "hash2"
+    coEvery { repository.getCachedSolve("hash1") } returns cachedSolve1
+    coEvery { repository.getCachedSolve("hash2") } returns cachedSolve2
+
+    viewModel.onImagesSelected(listOf(uri1, uri2))
+    viewModel.onUploadClick()
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    viewModel.uiState.test {
+      val state = awaitItem() as UploadUiState.Success
+      assertEquals(2, state.solveIds.size)
+      assertTrue(state.solveIds.contains(1L))
+      assertTrue(state.solveIds.contains(2L))
+    }
+  }
+
+  @Test
+  fun `partial success navigates with successful solveIds`() = runTest {
+    val uri1 = createUri("file:///test/image1.jpg")
+    val uri2 = createUri("file:///test/image2.jpg")
+    val cachedSolve1 = TestData.createSolve(id = 1)
+    val imageBytes = byteArrayOf(1, 2, 3)
+
+    coEvery { imageProcessor.readBytes(uri1) } returns imageBytes
+    coEvery { imageProcessor.readBytes(uri2) } throws RuntimeException("Failed to read")
+    every { imageProcessor.computeHash(imageBytes) } returns "hash1"
+    coEvery { repository.getCachedSolve("hash1") } returns cachedSolve1
+
+    viewModel.onImagesSelected(listOf(uri1, uri2))
+    viewModel.onUploadClick()
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    viewModel.uiState.test {
+      val state = awaitItem() as UploadUiState.Success
+      assertEquals(listOf(1L), state.solveIds)
+    }
+  }
+
+  @Test
+  fun `concurrency is limited to MAX_CONCURRENT_UPLOADS`() = runTest {
+    val uris = (1..4).map { createUri("file:///test/image$it.jpg") }
+    val imageBytes = byteArrayOf(1, 2, 3)
+
+    uris.forEach { uri -> coEvery { imageProcessor.readBytes(uri) } returns imageBytes }
+    every { imageProcessor.computeHash(imageBytes) } returns "hash"
+    coEvery { repository.getCachedSolve("hash") } returns TestData.createSolve(id = 1)
+
+    viewModel.onImagesSelected(uris)
+    viewModel.onUploadClick()
+    testDispatcher.scheduler.runCurrent()
+
+    val state = viewModel.uiState.value as UploadUiState.Processing
+    val processingCount = state.items.count { it.status is ImageStatus.Processing }
+    val pendingCount = state.items.count { it.status is ImageStatus.Pending }
+    assertTrue(
+        "Should have at most ${UploadViewModel.MAX_CONCURRENT_UPLOADS} processing",
+        processingCount <= UploadViewModel.MAX_CONCURRENT_UPLOADS,
+    )
+    assertTrue("Should have some pending items", pendingCount > 0 || processingCount < uris.size)
   }
 }
