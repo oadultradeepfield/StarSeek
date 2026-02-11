@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import com.oadultradeepfield.starseek.domain.repository.ImageProcessor
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -17,8 +18,8 @@ import javax.inject.Singleton
 @Singleton
 class ImageProcessorImpl
 @Inject
-constructor(@param:ApplicationContext private val context: Context) {
-  suspend fun readBytes(uri: Uri): ByteArray =
+constructor(@param:ApplicationContext private val context: Context) : ImageProcessor {
+  override suspend fun readBytes(uri: Uri): ByteArray =
       withContext(Dispatchers.IO) {
         val inputStream =
             context.contentResolver.openInputStream(uri)
@@ -27,13 +28,13 @@ constructor(@param:ApplicationContext private val context: Context) {
         inputStream.use { it.readBytes() }
       }
 
-  fun computeHash(bytes: ByteArray): String {
+  override fun computeHash(bytes: ByteArray): String {
     val digest = MessageDigest.getInstance("SHA-256")
     val hashBytes = digest.digest(bytes)
     return hashBytes.joinToString("") { "%02x".format(it) }
   }
 
-  suspend fun copyToInternalStorage(bytes: ByteArray): Uri =
+  override suspend fun copyToInternalStorage(bytes: ByteArray): Uri =
       withContext(Dispatchers.IO) {
         val dir = File(context.filesDir, IMAGES_DIR).apply { mkdirs() }
         val file = File(dir, "${UUID.randomUUID()}.jpg")
@@ -42,7 +43,7 @@ constructor(@param:ApplicationContext private val context: Context) {
         Uri.fromFile(file)
       }
 
-  suspend fun compressForUpload(bytes: ByteArray): ByteArray =
+  override suspend fun compressForUpload(bytes: ByteArray): ByteArray =
       withContext(Dispatchers.IO) {
         val bitmap =
             BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
@@ -61,7 +62,7 @@ constructor(@param:ApplicationContext private val context: Context) {
         compressed
       }
 
-  fun deleteImage(uri: Uri) {
+  override fun deleteImage(uri: Uri) {
     uri.path?.let { File(it).delete() }
   }
 
