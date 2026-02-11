@@ -8,5 +8,5 @@ sealed class NavRoutes {
 
   @Serializable data object History : NavRoutes()
 
-  @Serializable data class Results(val solveId: Long) : NavRoutes()
+  @Serializable data class Results(val solveIds: String) : NavRoutes()
 }

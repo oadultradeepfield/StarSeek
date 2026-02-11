@@ -55,22 +55,27 @@ fun StarSeekNavHost(navController: NavHostController, modifier: Modifier = Modif
     composable<NavRoutes.Upload> {
       UploadScreen(
           viewModel = hiltViewModel(),
-          onNavigateToResults = { solve -> navController.navigate(NavRoutes.Results(solve.id)) },
+          onNavigateToResults = { solveIds ->
+            navController.navigate(NavRoutes.Results(solveIds.joinToString(",")))
+          },
       )
     }
 
     composable<NavRoutes.History> {
       HistoryScreen(
           viewModel = hiltViewModel(),
-          onSolveClick = { solveId -> navController.navigate(NavRoutes.Results(solveId)) },
+          onSolveClick = { solveId ->
+            navController.navigate(NavRoutes.Results(solveId.toString()))
+          },
       )
     }
 
     composable<NavRoutes.Results> { backStackEntry ->
       val route = backStackEntry.toRoute<NavRoutes.Results>()
+      val solveIds = route.solveIds.split(",").mapNotNull { it.toLongOrNull() }
       ResultsScreen(
           viewModel = hiltViewModel(),
-          solveId = route.solveId,
+          solveIds = solveIds,
           onNavigateBack = { navController.popBackStack() },
       )
     }
