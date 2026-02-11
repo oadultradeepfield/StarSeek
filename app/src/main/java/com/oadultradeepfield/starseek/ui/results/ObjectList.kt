@@ -68,7 +68,7 @@ internal fun ObjectList(
     item {
       Spacer(modifier = Modifier.height(Dimens.spacingXLarge))
       Text(
-          "$objectCount objects detected",
+          "$objectCount object(s) detected",
           style = MaterialTheme.typography.headlineSmall,
           modifier = horizontalPadding,
       )
