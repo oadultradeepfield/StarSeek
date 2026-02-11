@@ -3,6 +3,7 @@ package com.oadultradeepfield.starseek.di
 import android.content.Context
 import androidx.room.Room
 import com.oadultradeepfield.starseek.BuildConfig
+import com.oadultradeepfield.starseek.data.local.ObjectDetailDao
 import com.oadultradeepfield.starseek.data.local.SolveDao
 import com.oadultradeepfield.starseek.data.local.StarSeekDatabase
 import dagger.Module
@@ -25,4 +26,9 @@ object DatabaseModule {
   @Provides
   @Singleton
   fun provideSolveDao(database: StarSeekDatabase): SolveDao = database.solveDao()
+
+  @Provides
+  @Singleton
+  fun provideObjectDetailDao(database: StarSeekDatabase): ObjectDetailDao =
+      database.objectDetailDao()
 }
