@@ -1,9 +1,12 @@
 package com.oadultradeepfield.starseek.ui.upload
 
+import android.content.res.Configuration
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,12 +26,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.AsyncImage
 import com.oadultradeepfield.starseek.domain.model.Solve
 import com.oadultradeepfield.starseek.ui.components.EmptyState
 import com.oadultradeepfield.starseek.ui.components.ErrorState
 import com.oadultradeepfield.starseek.ui.components.LoadingIndicator
 import com.oadultradeepfield.starseek.ui.theme.Dimens
+import com.oadultradeepfield.starseek.ui.theme.StarSeekTheme
 
 @Composable
 fun UploadScreen(viewModel: UploadViewModel, onNavigateToResults: (Solve) -> Unit) {
@@ -69,24 +74,35 @@ fun UploadScreen(viewModel: UploadViewModel, onNavigateToResults: (Solve) -> Uni
 }
 
 @Composable
-private fun ImageSelectedState(uri: Uri, onUploadClick: () -> Unit, onChangeClick: () -> Unit) {
+internal fun ImageSelectedState(uri: Uri, onUploadClick: () -> Unit, onChangeClick: () -> Unit) {
+  ImageSelectedContent(
+      image = {
+        AsyncImage(
+            model = uri,
+            contentDescription = "Selected image",
+            modifier = Modifier.size(Dimens.thumbnailSizeLarge).clip(MaterialTheme.shapes.medium),
+            contentScale = ContentScale.Crop,
+        )
+      },
+      onUploadClick = onUploadClick,
+      onChangeClick = onChangeClick,
+  )
+}
+
+@Composable
+private fun ImageSelectedContent(
+    image: @Composable () -> Unit,
+    onUploadClick: () -> Unit,
+    onChangeClick: () -> Unit,
+) {
   Column(
       modifier = Modifier.fillMaxSize().padding(Dimens.screenPadding),
       horizontalAlignment = Alignment.CenterHorizontally,
   ) {
-    AsyncImage(
-        model = uri,
-        contentDescription = "Selected image",
-        modifier = Modifier.size(Dimens.thumbnailSizeLarge).clip(MaterialTheme.shapes.medium),
-        contentScale = ContentScale.Crop,
-    )
-
+    image()
     Spacer(modifier = Modifier.height(Dimens.spacingXLarge))
-
     Button(onClick = onUploadClick, modifier = Modifier.fillMaxWidth()) { Text("Identify Stars") }
-
     Spacer(modifier = Modifier.height(Dimens.spacingSmall))
-
     OutlinedButton(onClick = onChangeClick, modifier = Modifier.fillMaxWidth()) {
       Text("Change Photo")
     }
@@ -94,25 +110,68 @@ private fun ImageSelectedState(uri: Uri, onUploadClick: () -> Unit, onChangeClic
 }
 
 @Composable
-private fun LoadingState(uri: Uri, message: String) {
+internal fun LoadingState(uri: Uri, message: String) {
+  LoadingStateContent(
+      image = {
+        AsyncImage(
+            model = uri,
+            contentDescription = "Processing image",
+            modifier = Modifier.size(Dimens.thumbnailSizeMedium).clip(MaterialTheme.shapes.medium),
+            contentScale = ContentScale.Crop,
+        )
+      },
+      message = message,
+  )
+}
+
+@Composable
+private fun LoadingStateContent(image: @Composable () -> Unit, message: String) {
   Column(
       modifier = Modifier.fillMaxSize().padding(Dimens.screenPadding),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center,
   ) {
-    AsyncImage(
-        model = uri,
-        contentDescription = "Processing image",
-        modifier = Modifier.size(Dimens.thumbnailSizeMedium).clip(MaterialTheme.shapes.medium),
-        contentScale = ContentScale.Crop,
-    )
-
+    image()
     Spacer(modifier = Modifier.height(Dimens.spacingXLarge))
-
     LoadingIndicator(Modifier.size(Dimens.loadingIndicatorSize))
-
     Spacer(modifier = Modifier.height(Dimens.spacingLarge))
-
     Text(message, style = MaterialTheme.typography.bodyLarge)
+  }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun ImageSelectedStatePreview() {
+  StarSeekTheme(dynamicColor = false) {
+    ImageSelectedContent(
+        image = {
+          Box(
+              Modifier.size(Dimens.thumbnailSizeLarge)
+                  .clip(MaterialTheme.shapes.medium)
+                  .background(MaterialTheme.colorScheme.surfaceVariant)
+          )
+        },
+        onUploadClick = {},
+        onChangeClick = {},
+    )
+  }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun LoadingStatePreview() {
+  StarSeekTheme(dynamicColor = false) {
+    LoadingStateContent(
+        image = {
+          Box(
+              Modifier.size(Dimens.thumbnailSizeMedium)
+                  .clip(MaterialTheme.shapes.medium)
+                  .background(MaterialTheme.colorScheme.surfaceVariant)
+          )
+        },
+        message = "Analyzing star patterns...",
+    )
   }
 }

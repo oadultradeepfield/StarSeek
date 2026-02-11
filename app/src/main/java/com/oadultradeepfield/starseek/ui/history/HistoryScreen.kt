@@ -1,6 +1,9 @@
 package com.oadultradeepfield.starseek.ui.history
 
+import android.content.res.Configuration
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,12 +34,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.AsyncImage
 import com.oadultradeepfield.starseek.domain.model.CelestialObject
+import com.oadultradeepfield.starseek.domain.model.ObjectType
 import com.oadultradeepfield.starseek.domain.model.Solve
 import com.oadultradeepfield.starseek.ui.components.EmptyState
 import com.oadultradeepfield.starseek.ui.components.LoadingIndicator
 import com.oadultradeepfield.starseek.ui.theme.Dimens
+import com.oadultradeepfield.starseek.ui.theme.StarSeekTheme
 import com.oadultradeepfield.starseek.util.formatRelativeDate
 
 @Composable
@@ -68,7 +74,7 @@ fun HistoryScreen(viewModel: HistoryViewModel, onSolveClick: (Long) -> Unit) {
 }
 
 @Composable
-private fun HistoryList(
+internal fun HistoryList(
     solves: List<Solve>,
     onSolveClick: (Long) -> Unit,
     onDeleteClick: (Long) -> Unit,
@@ -85,12 +91,36 @@ private fun HistoryList(
 }
 
 @Composable
-private fun HistoryItem(solve: Solve, onClick: () -> Unit, onDeleteClick: () -> Unit) {
+internal fun HistoryItem(solve: Solve, onClick: () -> Unit, onDeleteClick: () -> Unit) {
   val summary by
       remember(solve.objects) { derivedStateOf { computeConstellationSummary(solve.objects) } }
-  val itemDescription =
-      "$summary, ${solve.objects.size} objects, ${formatRelativeDate(solve.timestamp)}"
+  HistoryItemContent(
+      summary = summary,
+      objectCount = solve.objects.size,
+      timestamp = solve.timestamp,
+      image = {
+        AsyncImage(
+            model = solve.imageUri,
+            contentDescription = "Thumbnail for $summary",
+            modifier = Modifier.size(Dimens.thumbnailSizeSmall).clip(MaterialTheme.shapes.small),
+            contentScale = ContentScale.Crop,
+        )
+      },
+      onClick = onClick,
+      onDeleteClick = onDeleteClick,
+  )
+}
 
+@Composable
+private fun HistoryItemContent(
+    summary: String,
+    objectCount: Int,
+    timestamp: Long,
+    image: @Composable () -> Unit,
+    onClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+) {
+  val itemDescription = "$summary, $objectCount objects, ${formatRelativeDate(timestamp)}"
   Card(
       modifier =
           Modifier.fillMaxWidth()
@@ -102,29 +132,21 @@ private fun HistoryItem(solve: Solve, onClick: () -> Unit, onDeleteClick: () -> 
         modifier = Modifier.padding(Dimens.cardPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-      AsyncImage(
-          model = solve.imageUri,
-          contentDescription = "Thumbnail for $summary",
-          modifier = Modifier.size(Dimens.thumbnailSizeSmall).clip(MaterialTheme.shapes.small),
-          contentScale = ContentScale.Crop,
-      )
-
+      image()
       Spacer(modifier = Modifier.width(Dimens.cardPadding))
-
       Column(modifier = Modifier.weight(1f)) {
         Text(summary, style = MaterialTheme.typography.titleMedium)
         Text(
-            "${solve.objects.size} objects",
+            "$objectCount objects",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
-            formatRelativeDate(solve.timestamp),
+            formatRelativeDate(timestamp),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
       }
-
       IconButton(onClick = onDeleteClick) {
         Icon(Icons.Default.Delete, contentDescription = "Delete $summary")
       }
@@ -142,7 +164,7 @@ private fun computeConstellationSummary(objects: List<CelestialObject>): String 
 }
 
 @Composable
-private fun DeleteConfirmDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+internal fun DeleteConfirmDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
   AlertDialog(
       onDismissRequest = onDismiss,
       title = { Text("Delete this result?") },
@@ -150,4 +172,66 @@ private fun DeleteConfirmDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
       confirmButton = { TextButton(onClick = onConfirm) { Text("Delete") } },
       dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
   )
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun HistoryListPreview() {
+  StarSeekTheme(dynamicColor = false) {
+    val solves =
+        listOf(
+            Solve(
+                id = 1,
+                imageUri = "",
+                imageHash = "",
+                objects =
+                    listOf(
+                        CelestialObject("Betelgeuse", ObjectType.STAR, "Orion"),
+                        CelestialObject("Rigel", ObjectType.STAR, "Orion"),
+                    ),
+                timestamp = System.currentTimeMillis(),
+            ),
+            Solve(
+                id = 2,
+                imageUri = "",
+                imageHash = "",
+                objects =
+                    listOf(
+                        CelestialObject("Polaris", ObjectType.STAR, "Ursa Minor"),
+                    ),
+                timestamp = System.currentTimeMillis() - 86400000,
+            ),
+        )
+    HistoryList(solves = solves, onSolveClick = {}, onDeleteClick = {})
+  }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun HistoryItemPreview() {
+  StarSeekTheme(dynamicColor = false) {
+    HistoryItemContent(
+        summary = "Orion",
+        objectCount = 5,
+        timestamp = System.currentTimeMillis(),
+        image = {
+          Box(
+              Modifier.size(Dimens.thumbnailSizeSmall)
+                  .clip(MaterialTheme.shapes.small)
+                  .background(MaterialTheme.colorScheme.surfaceVariant)
+          )
+        },
+        onClick = {},
+        onDeleteClick = {},
+    )
+  }
+}
+
+@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun DeleteConfirmDialogPreview() {
+  StarSeekTheme(dynamicColor = false) { DeleteConfirmDialog(onConfirm = {}, onDismiss = {}) }
 }
