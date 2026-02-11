@@ -17,11 +17,7 @@ data class JobStatusResponse(
     val error: String? = null,
 )
 
-@Serializable
-data class SolveResult(
-    val annotatedImageUrl: String,
-    val objects: List<CelestialObjectDto>,
-)
+@Serializable data class SolveResult(val objects: List<CelestialObjectDto>)
 
 @Serializable
 data class CelestialObjectDto(

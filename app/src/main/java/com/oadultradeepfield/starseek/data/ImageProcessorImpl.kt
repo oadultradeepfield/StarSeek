@@ -7,8 +7,6 @@ import android.net.Uri
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.security.MessageDigest
@@ -19,10 +17,7 @@ import javax.inject.Singleton
 @Singleton
 class ImageProcessorImpl
 @Inject
-constructor(
-    @param:ApplicationContext private val context: Context,
-    private val httpClient: OkHttpClient,
-) {
+constructor(@param:ApplicationContext private val context: Context) {
   suspend fun readBytes(uri: Uri): ByteArray =
       withContext(Dispatchers.IO) {
         val inputStream =
@@ -64,14 +59,6 @@ constructor(
         } while (compressed.size > MAX_SIZE_BYTES && quality > 10)
 
         compressed
-      }
-
-  suspend fun downloadAndSave(url: String): Uri =
-      withContext(Dispatchers.IO) {
-        val request = Request.Builder().url(url).build()
-        val response = httpClient.newCall(request).execute()
-        val bytes = response.body.bytes()
-        copyToInternalStorage(bytes)
       }
 
   fun deleteImage(uri: Uri) {

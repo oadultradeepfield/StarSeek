@@ -14,8 +14,7 @@ type JobStatusResponse struct {
 }
 
 type SolveResult struct {
-	AnnotatedImageURL string            `json:"annotatedImageUrl"`
-	Objects           []CelestialObject `json:"objects"`
+	Objects []CelestialObject `json:"objects"`
 }
 
 type CelestialObject struct {
@@ -53,8 +52,5 @@ func FromSolveResult(r *model.SolveResult) *SolveResult {
 		}
 	}
 
-	return &SolveResult{
-		AnnotatedImageURL: r.AnnotatedImageURL,
-		Objects:           objects,
-	}
+	return &SolveResult{Objects: objects}
 }

@@ -7,7 +7,6 @@ package com.oadultradeepfield.starseek.domain.model
 data class Solve(
     val id: Long = 0,
     val imageUri: String,
-    val annotatedImageUri: String,
     val imageHash: String,
     val objects: List<CelestialObject>,
     val timestamp: Long,

@@ -19,8 +19,7 @@ func (o CelestialObject) GetDisplayName() string {
 }
 
 type SolveResult struct {
-	AnnotatedImageURL string
-	Objects           []CelestialObject
+	Objects []CelestialObject
 }
 
 func GetCelestialObject(name string) (*CelestialObject, bool) {

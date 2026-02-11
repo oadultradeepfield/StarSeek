@@ -38,13 +38,7 @@ constructor(
 
     when (response.status) {
       JobStatusType.PROCESSING -> JobStatus.Processing
-      JobStatusType.SUCCESS -> {
-        val result = response.result!!
-        JobStatus.Success(
-            solve = mapper.mapToDomain(result),
-            annotatedImageUrl = result.annotatedImageUrl,
-        )
-      }
+      JobStatusType.SUCCESS -> JobStatus.Success(mapper.mapToDomain(response.result!!))
       JobStatusType.FAILED -> JobStatus.Failed(response.error ?: "Unknown error")
     }
   }

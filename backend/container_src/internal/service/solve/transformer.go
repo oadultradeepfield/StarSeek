@@ -1,7 +1,6 @@
 package solve
 
 import (
-	"strconv"
 	"strings"
 
 	"server/internal/client/astrometry"
@@ -9,7 +8,7 @@ import (
 	"server/internal/model/data"
 )
 
-func TransformAnnotations(annotations []astrometry.Annotation, objectsInField []string, jobID int) *model.SolveResult {
+func TransformAnnotations(annotations []astrometry.Annotation, objectsInField []string) *model.SolveResult {
 	var objects []model.CelestialObject
 	seen := make(map[string]bool)
 
@@ -68,8 +67,5 @@ func TransformAnnotations(annotations []astrometry.Annotation, objectsInField []
 		})
 	}
 
-	return &model.SolveResult{
-		AnnotatedImageURL: "https://nova.astrometry.net/annotated_full/" + strconv.Itoa(jobID),
-		Objects:           objects,
-	}
+	return &model.SolveResult{Objects: objects}
 }

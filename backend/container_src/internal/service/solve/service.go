@@ -75,7 +75,7 @@ func (s *Service) GetJobStatus(ctx context.Context, subID int) (*JobStatus, erro
 
 		return &JobStatus{
 			Status: StatusSuccess,
-			Result: TransformAnnotations(annotations, job.ObjectsInField, actualJobID),
+			Result: TransformAnnotations(annotations, job.ObjectsInField),
 		}, nil
 	case "failure":
 		return &JobStatus{

@@ -14,7 +14,6 @@ class SolveMapper @Inject constructor(private val json: Json) {
       Solve(
           id = entity.id,
           imageUri = entity.imageUri,
-          annotatedImageUri = entity.annotatedImageUri,
           imageHash = entity.imageHash,
           objects = json.decodeFromString(entity.objectsJson),
           timestamp = entity.timestamp,
@@ -23,7 +22,6 @@ class SolveMapper @Inject constructor(private val json: Json) {
   fun mapToEntity(solve: Solve): SolveEntity =
       SolveEntity(
           imageUri = solve.imageUri,
-          annotatedImageUri = solve.annotatedImageUri,
           imageHash = solve.imageHash,
           objectsJson = json.encodeToString(solve.objects),
           objectCount = solve.objects.size,
@@ -33,7 +31,6 @@ class SolveMapper @Inject constructor(private val json: Json) {
   fun mapToDomain(result: SolveResult): Solve =
       Solve(
           imageUri = "",
-          annotatedImageUri = "",
           imageHash = "",
           objects = result.objects.map { mapToDomain(it) },
           timestamp = System.currentTimeMillis(),
