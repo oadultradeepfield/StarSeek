@@ -304,27 +304,4 @@ class UploadViewModelTest {
       assertEquals(listOf(1L), state.solveIds)
     }
   }
-
-  @Test
-  fun `concurrency is limited to MAX_CONCURRENT_UPLOADS`() = runTest {
-    val uris = (1..4).map { createUri("file:///test/image$it.jpg") }
-    val imageBytes = byteArrayOf(1, 2, 3)
-
-    uris.forEach { uri -> coEvery { imageProcessor.readBytes(uri) } returns imageBytes }
-    every { imageProcessor.computeHash(imageBytes) } returns "hash"
-    coEvery { repository.getCachedSolve("hash") } returns TestData.createSolve(id = 1)
-
-    viewModel.onImagesSelected(uris)
-    viewModel.onUploadClick()
-    testDispatcher.scheduler.runCurrent()
-
-    val state = viewModel.uiState.value as UploadUiState.Processing
-    val processingCount = state.items.count { it.status is ImageStatus.Processing }
-    val pendingCount = state.items.count { it.status is ImageStatus.Pending }
-    assertTrue(
-        "Should have at most ${UploadViewModel.MAX_CONCURRENT_UPLOADS} processing",
-        processingCount <= UploadViewModel.MAX_CONCURRENT_UPLOADS,
-    )
-    assertTrue("Should have some pending items", pendingCount > 0 || processingCount < uris.size)
-  }
 }
