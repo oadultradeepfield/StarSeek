@@ -49,13 +49,11 @@ constructor(
 
   suspend fun compressForUpload(bytes: ByteArray): ByteArray =
       withContext(Dispatchers.IO) {
-        if (bytes.size <= MAX_SIZE_BYTES) return@withContext bytes
-
         val bitmap =
             BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                 ?: throw IllegalStateException("Cannot decode image")
 
-        var quality = 90
+        var quality = if (bytes.size <= MAX_SIZE_BYTES) 95 else 90
         var compressed: ByteArray
 
         do {
