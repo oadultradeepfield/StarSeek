@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -60,6 +61,7 @@ fun HistoryScreen(viewModel: HistoryViewModel, onSolveClick: (Long) -> Unit) {
     is HistoryUiState.Content ->
         HistoryList(
             solves = state.solves,
+            count = state.solves.size,
             onSolveClick = onSolveClick,
             onDeleteClick = viewModel::onDeleteClick,
         )
@@ -76,10 +78,15 @@ fun HistoryScreen(viewModel: HistoryViewModel, onSolveClick: (Long) -> Unit) {
 @Composable
 internal fun HistoryList(
     solves: List<Solve>,
+    count: Int,
     onSolveClick: (Long) -> Unit,
     onDeleteClick: (Long) -> Unit,
 ) {
   LazyColumn(modifier = Modifier.fillMaxSize().padding(Dimens.screenPadding)) {
+    item {
+      Text("$count solved images", style = MaterialTheme.typography.headlineSmall)
+      Spacer(modifier = Modifier.height(Dimens.spacingLarge))
+    }
     items(solves, key = { it.id }) { solve ->
       HistoryItem(
           solve = solve,
@@ -203,7 +210,7 @@ private fun HistoryListPreview() {
                 timestamp = System.currentTimeMillis() - 86400000,
             ),
         )
-    HistoryList(solves = solves, onSolveClick = {}, onDeleteClick = {})
+    HistoryList(solves = solves, count = solves.size, onSolveClick = {}, onDeleteClick = {})
   }
 }
 
