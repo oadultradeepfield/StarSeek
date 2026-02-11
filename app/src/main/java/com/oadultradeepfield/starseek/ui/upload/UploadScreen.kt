@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -32,10 +33,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import coil3.compose.AsyncImage
+import com.oadultradeepfield.starseek.R
 import com.oadultradeepfield.starseek.domain.model.Solve
-import com.oadultradeepfield.starseek.ui.components.EmptyState
 import com.oadultradeepfield.starseek.ui.components.ErrorState
 import com.oadultradeepfield.starseek.ui.components.LoadingIndicator
 import com.oadultradeepfield.starseek.ui.theme.Dimens
@@ -59,10 +62,7 @@ fun UploadScreen(viewModel: UploadViewModel, onNavigateToResults: (Solve) -> Uni
   }
 
   when (val state = uiState) {
-    is UploadUiState.Empty ->
-        EmptyState(title = "Select a night sky photo") {
-          Button(onClick = { launcher.launch("image/*") }) { Text("Choose Photo") }
-        }
+    is UploadUiState.Empty -> WelcomeState(onChoosePhoto = { launcher.launch("image/*") })
     is UploadUiState.ImageSelected ->
         ImageSelectedState(
             uri = state.uri,
@@ -76,6 +76,40 @@ fun UploadScreen(viewModel: UploadViewModel, onNavigateToResults: (Solve) -> Uni
             message = state.message,
             onRetry = state.lastUri?.let { { viewModel.retry() } },
         )
+  }
+}
+
+@Composable
+private fun WelcomeState(onChoosePhoto: () -> Unit) {
+  Column(
+      modifier = Modifier.fillMaxSize().padding(Dimens.screenPaddingLarge),
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.Center,
+  ) {
+    Icon(
+        painter = painterResource(R.drawable.ic_launcher_foreground),
+        contentDescription = null,
+        modifier = Modifier.size(Dimens.thumbnailSizeMedium),
+        tint = MaterialTheme.colorScheme.primary,
+    )
+    Text("StarSeek", style = MaterialTheme.typography.headlineLarge)
+    Spacer(modifier = Modifier.height(Dimens.spacingSmall))
+    Text(
+        "Unlock the hidden wonders within your night-sky captures.",
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+    )
+    Spacer(modifier = Modifier.height(Dimens.spacingLarge))
+    Button(onClick = onChoosePhoto, modifier = Modifier.fillMaxWidth()) {
+      Icon(
+          imageVector = Icons.Default.CameraAlt,
+          contentDescription = null,
+          modifier = Modifier.size(Dimens.spacingLarge),
+      )
+      Spacer(modifier = Modifier.width(Dimens.spacingMedium))
+      Text("Choose Photo", style = MaterialTheme.typography.labelLarge)
+    }
   }
 }
 
@@ -169,6 +203,13 @@ private fun LoadingStateContent(image: @Composable () -> Unit, message: String) 
       Text(message, style = MaterialTheme.typography.bodyLarge)
     }
   }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun WelcomeStatePreview() {
+  StarSeekTheme(dynamicColor = false) { WelcomeState(onChoosePhoto = {}) }
 }
 
 @Preview(showBackground = true)
