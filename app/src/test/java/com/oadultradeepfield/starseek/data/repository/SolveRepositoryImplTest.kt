@@ -3,7 +3,6 @@ package com.oadultradeepfield.starseek.data.repository
 import com.oadultradeepfield.starseek.data.local.ObjectDetailDao
 import com.oadultradeepfield.starseek.data.local.ObjectDetailEntity
 import com.oadultradeepfield.starseek.data.local.SolveDao
-import com.oadultradeepfield.starseek.data.mapper.SolveMapper
 import com.oadultradeepfield.starseek.data.remote.StarSeekApi
 import com.oadultradeepfield.starseek.data.remote.dto.JobStatusResponse
 import com.oadultradeepfield.starseek.data.remote.dto.JobStatusType
@@ -19,6 +18,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -29,7 +29,6 @@ class SolveRepositoryImplTest {
   private lateinit var api: StarSeekApi
   private lateinit var dao: SolveDao
   private lateinit var objectDetailDao: ObjectDetailDao
-  private lateinit var mapper: SolveMapper
   private lateinit var repository: SolveRepositoryImpl
 
   @Before
@@ -37,20 +36,18 @@ class SolveRepositoryImplTest {
     api = mockk()
     dao = mockk()
     objectDetailDao = mockk()
-    mapper = mockk()
-    repository = SolveRepositoryImpl(api, dao, objectDetailDao, mapper)
+    repository = SolveRepositoryImpl(api, dao, objectDetailDao)
   }
 
   @Test
-  fun `getCachedSolve returns mapped solve when DAO finds entity`() = runTest {
-    val entity = TestData.createSolveEntity()
-    val solve = TestData.createSolve()
-
+  fun `getCachedSolve returns solve when DAO finds entity`() = runTest {
+    val objects = listOf(TestData.createCelestialObject())
+    val entity = TestData.createSolveEntity(objectsJson = Json.encodeToString(objects))
     coEvery { dao.getSolveByHash("hash123") } returns entity
-    every { mapper.mapToDomain(entity) } returns solve
-
     val result = repository.getCachedSolve("hash123")
-    assertEquals(solve, result)
+    assertEquals(entity.id, result?.id)
+    assertEquals(entity.imageUri, result?.imageUri)
+    assertEquals(entity.imageHash, result?.imageHash)
   }
 
   @Test
@@ -63,11 +60,8 @@ class SolveRepositoryImplTest {
   @Test
   fun `uploadImage returns jobId on success`() = runTest {
     val response = SolveResponse(jobId = "job-123", status = "processing")
-
     coEvery { api.uploadImage(any()) } returns response
-
     val result = repository.uploadImage(byteArrayOf(1, 2, 3), "test.jpg")
-
     assertTrue(result.isSuccess)
     assertEquals("job-123", result.getOrNull())
   }
@@ -83,37 +77,29 @@ class SolveRepositoryImplTest {
   fun `getJobStatus returns Processing when status is processing`() = runTest {
     val response = JobStatusResponse(status = JobStatusType.PROCESSING)
     coEvery { api.getJobStatus("job-1") } returns response
-
     val result = repository.getJobStatus("job-1")
     assertTrue(result.isSuccess)
     assertEquals(JobStatus.Processing, result.getOrNull())
   }
 
   @Test
-  fun `getJobStatus returns Success with mapped solve when status is success`() = runTest {
+  fun `getJobStatus returns Success with solve when status is success`() = runTest {
     val solveResult = TestData.createSolveResult()
-    val solve = TestData.createSolve()
     val response = JobStatusResponse(status = JobStatusType.SUCCESS, result = solveResult)
-
     coEvery { api.getJobStatus("job-2") } returns response
-    every { mapper.mapToDomain(solveResult) } returns solve
-
     val result = repository.getJobStatus("job-2")
-
     assertTrue(result.isSuccess)
-
     val status = result.getOrNull() as JobStatus.Success
-    assertEquals(solve, status.solve)
+    assertEquals(solveResult.objects.size, status.solve.objects.size)
+    assertEquals(solveResult.objects[0].name, status.solve.objects[0].name)
   }
 
   @Test
   fun `getJobStatus returns Failed with error message when status is failed`() = runTest {
     val response = JobStatusResponse(status = JobStatusType.FAILED, error = "Image too dark")
     coEvery { api.getJobStatus("job-3") } returns response
-
     val result = repository.getJobStatus("job-3")
     assertTrue(result.isSuccess)
-
     val status = result.getOrNull() as JobStatus.Failed
     assertEquals("Image too dark", status.error)
   }
@@ -122,54 +108,39 @@ class SolveRepositoryImplTest {
   fun `getJobStatus returns Unknown error when error is null`() = runTest {
     val response = JobStatusResponse(status = JobStatusType.FAILED, error = null)
     coEvery { api.getJobStatus("job-4") } returns response
-
     val result = repository.getJobStatus("job-4")
     assertTrue(result.isSuccess)
-
     val status = result.getOrNull() as JobStatus.Failed
     assertEquals("Unknown error", status.error)
   }
 
   @Test
-  fun `saveSolve maps to entity and returns inserted ID`() = runTest {
+  fun `saveSolve returns inserted ID`() = runTest {
     val solve = TestData.createSolve()
-    val entity = TestData.createSolveEntity()
-
-    every { mapper.mapToEntity(solve) } returns entity
-    coEvery { dao.insert(entity) } returns 42L
-
+    coEvery { dao.insert(any()) } returns 42L
     val result = repository.saveSolve(solve)
     assertEquals(42L, result)
   }
 
   @Test
-  fun `getAllSolves returns flow of mapped solves`() = runTest {
-    val entity1 = TestData.createSolveEntity(id = 1)
-    val entity2 = TestData.createSolveEntity(id = 2)
-    val solve1 = TestData.createSolve(id = 1)
-    val solve2 = TestData.createSolve(id = 2)
-
+  fun `getAllSolves returns flow of solves`() = runTest {
+    val objects = listOf(TestData.createCelestialObject())
+    val entity1 = TestData.createSolveEntity(id = 1, objectsJson = Json.encodeToString(objects))
+    val entity2 = TestData.createSolveEntity(id = 2, objectsJson = Json.encodeToString(objects))
     every { dao.getAllSolves() } returns flowOf(listOf(entity1, entity2))
-    every { mapper.mapToDomain(entity1) } returns solve1
-    every { mapper.mapToDomain(entity2) } returns solve2
-
     val result = repository.getAllSolves().first()
-
     assertEquals(2, result.size)
-    assertEquals(solve1, result[0])
-    assertEquals(solve2, result[1])
+    assertEquals(1L, result[0].id)
+    assertEquals(2L, result[1].id)
   }
 
   @Test
-  fun `getSolveById returns mapped solve when found`() = runTest {
-    val entity = TestData.createSolveEntity()
-    val solve = TestData.createSolve()
-
+  fun `getSolveById returns solve when found`() = runTest {
+    val objects = listOf(TestData.createCelestialObject())
+    val entity = TestData.createSolveEntity(objectsJson = Json.encodeToString(objects))
     coEvery { dao.getSolveById(1L) } returns entity
-    every { mapper.mapToDomain(entity) } returns solve
-
     val result = repository.getSolveById(1L)
-    assertEquals(solve, result)
+    assertEquals(entity.id, result?.id)
   }
 
   @Test
@@ -189,12 +160,8 @@ class SolveRepositoryImplTest {
   @Test
   fun `getObjectDetail returns cached result on cache hit`() = runTest {
     val cached = ObjectDetailEntity("Sirius", "star", "Canis Major", "Brightest star")
-
     coEvery { objectDetailDao.getByName("Sirius") } returns cached
-    every { mapper.mapToObjectType("star") } returns ObjectType.STAR
-
     val result = repository.getObjectDetail("Sirius")
-
     assertTrue(result.isSuccess)
     val detail = result.getOrNull()!!
     assertEquals("Sirius", detail.name)
@@ -207,14 +174,10 @@ class SolveRepositoryImplTest {
   @Test
   fun `getObjectDetail fetches from API and caches on cache miss`() = runTest {
     val response = ObjectDetailResponse("Sirius", "star", "Canis Major", "Brightest star")
-
     coEvery { objectDetailDao.getByName("Sirius") } returns null
     coEvery { api.getObjectDetail("Sirius") } returns response
     coEvery { objectDetailDao.insert(any()) } returns Unit
-    every { mapper.mapToObjectType("star") } returns ObjectType.STAR
-
     val result = repository.getObjectDetail("Sirius")
-
     assertTrue(result.isSuccess)
     val detail = result.getOrNull()!!
     assertEquals("Sirius", detail.name)

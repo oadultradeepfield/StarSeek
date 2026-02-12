@@ -1,56 +1,81 @@
 package com.oadultradeepfield.starseek.data.mapper
 
+import com.oadultradeepfield.starseek.data.local.ObjectDetailEntity
 import com.oadultradeepfield.starseek.data.local.SolveEntity
 import com.oadultradeepfield.starseek.data.remote.dto.CelestialObjectDto
+import com.oadultradeepfield.starseek.data.remote.dto.ObjectDetailResponse
 import com.oadultradeepfield.starseek.data.remote.dto.SolveResult
 import com.oadultradeepfield.starseek.domain.model.CelestialObject
+import com.oadultradeepfield.starseek.domain.model.ObjectDetail
 import com.oadultradeepfield.starseek.domain.model.ObjectType
 import com.oadultradeepfield.starseek.domain.model.Solve
 import kotlinx.serialization.json.Json
-import javax.inject.Inject
 
-class SolveMapper @Inject constructor(private val json: Json) {
-  fun mapToDomain(entity: SolveEntity): Solve =
-      Solve(
-          id = entity.id,
-          imageUri = entity.imageUri,
-          imageHash = entity.imageHash,
-          objects = json.decodeFromString(entity.objectsJson),
-          timestamp = entity.timestamp,
-      )
+private val json = Json
 
-  fun mapToEntity(solve: Solve): SolveEntity =
-      SolveEntity(
-          imageUri = solve.imageUri,
-          imageHash = solve.imageHash,
-          objectsJson = json.encodeToString(solve.objects),
-          objectCount = solve.objects.size,
-          timestamp = solve.timestamp,
-      )
+fun SolveEntity.toDomain(): Solve =
+    Solve(
+        id = id,
+        imageUri = imageUri,
+        imageHash = imageHash,
+        objects = json.decodeFromString(objectsJson),
+        timestamp = timestamp,
+    )
 
-  fun mapToDomain(result: SolveResult): Solve =
-      Solve(
-          imageUri = "",
-          imageHash = "",
-          objects = result.objects.map { mapToDomain(it) },
-          timestamp = System.currentTimeMillis(),
-      )
+fun Solve.toEntity(): SolveEntity =
+    SolveEntity(
+        imageUri = imageUri,
+        imageHash = imageHash,
+        objectsJson = json.encodeToString(objects),
+        timestamp = timestamp,
+    )
 
-  fun mapToDomain(dto: CelestialObjectDto): CelestialObject =
-      CelestialObject(
-          name = dto.name,
-          type = mapToObjectType(dto.type),
-          constellation = dto.constellation,
-          pixelX = dto.pixelX,
-          pixelY = dto.pixelY,
-      )
+fun SolveResult.toDomain(): Solve =
+    Solve(
+        imageUri = "",
+        imageHash = "",
+        objects = objects.map { it.toDomain() },
+        timestamp = System.currentTimeMillis(),
+    )
 
-  fun mapToObjectType(type: String): ObjectType =
-      when (type.lowercase()) {
-        "star" -> ObjectType.STAR
-        "nebula" -> ObjectType.NEBULA
-        "galaxy" -> ObjectType.GALAXY
-        "cluster" -> ObjectType.CLUSTER
-        else -> ObjectType.STAR
-      }
-}
+fun CelestialObjectDto.toDomain(): CelestialObject =
+    CelestialObject(
+        name = name,
+        type = type.toObjectType(),
+        constellation = constellation,
+        pixelX = pixelX,
+        pixelY = pixelY,
+    )
+
+fun ObjectDetailEntity.toDomain(): ObjectDetail =
+    ObjectDetail(
+        name = name,
+        type = type.toObjectType(),
+        constellation = constellation,
+        funFact = funFact,
+    )
+
+fun ObjectDetailResponse.toDomain(): ObjectDetail =
+    ObjectDetail(
+        name = name,
+        type = type.toObjectType(),
+        constellation = constellation,
+        funFact = funFact,
+    )
+
+fun ObjectDetailResponse.toEntity(): ObjectDetailEntity =
+    ObjectDetailEntity(
+        name = name,
+        type = type,
+        constellation = constellation,
+        funFact = funFact,
+    )
+
+fun String.toObjectType(): ObjectType =
+    when (lowercase()) {
+      "star" -> ObjectType.STAR
+      "nebula" -> ObjectType.NEBULA
+      "galaxy" -> ObjectType.GALAXY
+      "cluster" -> ObjectType.CLUSTER
+      else -> ObjectType.STAR
+    }

@@ -10,6 +10,5 @@ data class SolveEntity(
     val imageUri: String,
     val imageHash: String,
     val objectsJson: String,
-    val objectCount: Int,
     val timestamp: Long,
 )

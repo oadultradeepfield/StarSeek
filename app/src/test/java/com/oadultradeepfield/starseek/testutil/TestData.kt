@@ -13,7 +13,6 @@ object TestData {
       imageUri: String = "file:///images/image.jpg",
       imageHash: String = "abc123",
       objectsJson: String = "[]",
-      objectCount: Int = 1,
       timestamp: Long = 1700000000000L,
   ) =
       SolveEntity(
@@ -21,7 +20,6 @@ object TestData {
           imageUri = imageUri,
           imageHash = imageHash,
           objectsJson = objectsJson,
-          objectCount = objectCount,
           timestamp = timestamp,
       )
 
