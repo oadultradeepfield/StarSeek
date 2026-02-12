@@ -103,6 +103,7 @@ private fun HistoryItemContent(
 internal fun computeConstellationSummary(objects: List<CelestialObject>): String {
   val constellations = objects.map { it.constellation }.distinct()
   return when {
+    constellations.isEmpty() -> "Cannot Identify"
     constellations.size == 1 -> constellations.first()
     constellations.size <= 3 -> constellations.joinToString(", ")
     else -> "${constellations.take(2).joinToString(", ")} +${constellations.size - 2}"
