@@ -44,10 +44,13 @@ class ProcessAndUploadImageUseCaseTest {
     val cachedSolve = TestData.createSolve(id = 42)
     val imageBytes = byteArrayOf(1, 2, 3)
     val progressUpdates = mutableListOf<UploadProgress>()
+
     coEvery { imageProcessor.readBytes(uri) } returns imageBytes
     every { imageProcessor.computeHash(imageBytes) } returns "hash123"
     coEvery { repository.getCachedSolve("hash123") } returns cachedSolve
+
     val result = useCase(uri) { progressUpdates.add(it) }
+
     assertTrue(result is UploadResult.CacheHit)
     assertEquals(42L, (result as UploadResult.CacheHit).solveId)
     assertTrue(progressUpdates.contains(UploadProgress.CheckingCache))
@@ -60,6 +63,7 @@ class ProcessAndUploadImageUseCaseTest {
     val imageBytes = byteArrayOf(1, 2, 3)
     val solve = TestData.createSolve(id = 0)
     val progressUpdates = mutableListOf<UploadProgress>()
+
     coEvery { imageProcessor.readBytes(uri) } returns imageBytes
     every { imageProcessor.computeHash(imageBytes) } returns "hash123"
     coEvery { repository.getCachedSolve("hash123") } returns null
@@ -68,8 +72,11 @@ class ProcessAndUploadImageUseCaseTest {
     coEvery { repository.uploadImage(imageBytes, "image.jpg") } returns Result.success("job-123")
     coEvery { repository.getJobStatus("job-123") } returns Result.success(JobStatus.Success(solve))
     coEvery { repository.saveSolve(any()) } returns 99L
+
     val result = useCase(uri) { progressUpdates.add(it) }
+
     advanceTimeBy(6000)
+
     assertTrue(result is UploadResult.Success)
     assertEquals(99L, (result as UploadResult.Success).solveId)
     assertTrue(progressUpdates.contains(UploadProgress.CheckingCache))
@@ -82,6 +89,7 @@ class ProcessAndUploadImageUseCaseTest {
     val uri = createUri()
     val internalUri = createUri("file:///internal/image.jpg")
     val imageBytes = byteArrayOf(1, 2, 3)
+
     coEvery { imageProcessor.readBytes(uri) } returns imageBytes
     every { imageProcessor.computeHash(imageBytes) } returns "hash123"
     coEvery { repository.getCachedSolve("hash123") } returns null
@@ -89,7 +97,9 @@ class ProcessAndUploadImageUseCaseTest {
     coEvery { imageProcessor.compressForUpload(imageBytes) } returns imageBytes
     coEvery { repository.uploadImage(imageBytes, "image.jpg") } returns
         Result.failure(RuntimeException("Network error"))
+
     val result = useCase(uri) {}
+
     assertTrue(result is UploadResult.Failure)
     assertEquals("Network error", (result as UploadResult.Failure).error)
   }
@@ -99,6 +109,7 @@ class ProcessAndUploadImageUseCaseTest {
     val uri = createUri()
     val internalUri = createUri("file:///internal/image.jpg")
     val imageBytes = byteArrayOf(1, 2, 3)
+
     coEvery { imageProcessor.readBytes(uri) } returns imageBytes
     every { imageProcessor.computeHash(imageBytes) } returns "hash123"
     coEvery { repository.getCachedSolve("hash123") } returns null
@@ -107,8 +118,11 @@ class ProcessAndUploadImageUseCaseTest {
     coEvery { repository.uploadImage(imageBytes, "image.jpg") } returns Result.success("job-123")
     coEvery { repository.getJobStatus("job-123") } returns
         Result.success(JobStatus.Failed("Image too dark"))
+
     val result = useCase(uri) {}
+
     advanceTimeBy(6000)
+
     assertTrue(result is UploadResult.Failure)
     assertEquals("Image too dark", (result as UploadResult.Failure).error)
   }
@@ -116,8 +130,11 @@ class ProcessAndUploadImageUseCaseTest {
   @Test
   fun `returns Failure when image read throws exception`() = runTest {
     val uri = createUri()
+
     coEvery { imageProcessor.readBytes(uri) } throws RuntimeException("Cannot read image")
+
     val result = useCase(uri) {}
+
     assertTrue(result is UploadResult.Failure)
     assertEquals("Cannot read image", (result as UploadResult.Failure).error)
   }
@@ -128,6 +145,7 @@ class ProcessAndUploadImageUseCaseTest {
     val internalUri = createUri("file:///internal/image.jpg")
     val imageBytes = byteArrayOf(1, 2, 3)
     val solve = TestData.createSolve(id = 0, imageUri = "", imageHash = "")
+
     coEvery { imageProcessor.readBytes(uri) } returns imageBytes
     every { imageProcessor.computeHash(imageBytes) } returns "hash123"
     coEvery { repository.getCachedSolve("hash123") } returns null
@@ -136,8 +154,11 @@ class ProcessAndUploadImageUseCaseTest {
     coEvery { repository.uploadImage(imageBytes, "image.jpg") } returns Result.success("job-123")
     coEvery { repository.getJobStatus("job-123") } returns Result.success(JobStatus.Success(solve))
     coEvery { repository.saveSolve(any()) } returns 1L
+
     useCase(uri) {}
+
     advanceTimeBy(6000)
+
     coVerify {
       repository.saveSolve(
           match { it.imageUri == "file:///internal/image.jpg" && it.imageHash == "hash123" }

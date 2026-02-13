@@ -42,8 +42,11 @@ class HistoryViewModelTest {
   @Test
   fun `emits Content when solves exist`() = runTest {
     val solves = listOf(TestData.createSolve(id = 1), TestData.createSolve(id = 2))
+
     every { observeSolves() } returns flowOf(solves)
+
     val viewModel = HistoryViewModel(observeSolves, deleteSolveWithImage)
+
     viewModel.uiState.test {
       assertEquals(HistoryUiState.Loading, awaitItem())
       assertEquals(HistoryUiState.Content(solves), awaitItem())
@@ -53,7 +56,9 @@ class HistoryViewModelTest {
   @Test
   fun `emits Empty when no solves exist`() = runTest {
     every { observeSolves() } returns flowOf(emptyList())
+
     val viewModel = HistoryViewModel(observeSolves, deleteSolveWithImage)
+
     viewModel.uiState.test {
       assertEquals(HistoryUiState.Loading, awaitItem())
       assertEquals(HistoryUiState.Empty, awaitItem())
@@ -63,8 +68,11 @@ class HistoryViewModelTest {
   @Test
   fun `onDeleteClick sets deleteConfirmId`() = runTest {
     every { observeSolves() } returns flowOf(emptyList())
+
     val viewModel = HistoryViewModel(observeSolves, deleteSolveWithImage)
+
     testDispatcher.scheduler.advanceUntilIdle()
+
     viewModel.onDeleteClick(42L)
     viewModel.deleteConfirmId.test { assertEquals(42L, awaitItem()) }
   }
@@ -72,8 +80,11 @@ class HistoryViewModelTest {
   @Test
   fun `onDeleteDismiss clears deleteConfirmId`() = runTest {
     every { observeSolves() } returns flowOf(emptyList())
+
     val viewModel = HistoryViewModel(observeSolves, deleteSolveWithImage)
+
     testDispatcher.scheduler.advanceUntilIdle()
+
     viewModel.onDeleteClick(42L)
     viewModel.onDeleteDismiss()
     viewModel.deleteConfirmId.test { assertNull(awaitItem()) }
@@ -82,24 +93,32 @@ class HistoryViewModelTest {
   @Test
   fun `onDeleteConfirm calls use case and clears deleteConfirmId`() = runTest {
     val solve = TestData.createSolve(id = 1, imageUri = "file:///image.jpg")
+
     every { observeSolves() } returns flowOf(listOf(solve))
     coEvery { deleteSolveWithImage(1L) } returns Unit
+
     val viewModel = HistoryViewModel(observeSolves, deleteSolveWithImage)
+
     testDispatcher.scheduler.advanceUntilIdle()
     viewModel.onDeleteClick(1L)
     viewModel.onDeleteConfirm()
     testDispatcher.scheduler.advanceUntilIdle()
+
     coVerify { deleteSolveWithImage(1L) }
+
     viewModel.deleteConfirmId.test { assertNull(awaitItem()) }
   }
 
   @Test
   fun `onDeleteConfirm does nothing when deleteConfirmId is null`() = runTest {
     every { observeSolves() } returns flowOf(emptyList())
+
     val viewModel = HistoryViewModel(observeSolves, deleteSolveWithImage)
+
     testDispatcher.scheduler.advanceUntilIdle()
     viewModel.onDeleteConfirm()
     testDispatcher.scheduler.advanceUntilIdle()
+
     coVerify(exactly = 0) { deleteSolveWithImage(any()) }
   }
 }

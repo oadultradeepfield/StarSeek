@@ -57,10 +57,14 @@ class ResultsViewModelTest {
                 constellation = "Orion",
             ),
         )
+
     val solve = TestData.createSolve(objects = objects)
+
     coEvery { getSolveById(1L) } returns solve
+
     viewModel.loadFromId(1L)
     testDispatcher.scheduler.advanceUntilIdle()
+
     viewModel.uiState.test {
       val state = awaitItem() as ResultsUiState.Content
       assertEquals(solve, state.solve)
@@ -71,6 +75,7 @@ class ResultsViewModelTest {
   @Test
   fun `loadFromId emits Error when solve not found`() = runTest {
     coEvery { getSolveById(999L) } returns null
+
     viewModel.loadFromId(999L)
     testDispatcher.scheduler.advanceUntilIdle()
     viewModel.uiState.test { assertEquals(ResultsUiState.Error("Solve not found"), awaitItem()) }
@@ -79,10 +84,13 @@ class ResultsViewModelTest {
   @Test
   fun `highlightObject sets highlightedObjectName`() = runTest {
     val solve = TestData.createSolve(objects = emptyList())
+
     coEvery { getSolveById(1L) } returns solve
+
     viewModel.loadFromId(1L)
     testDispatcher.scheduler.advanceUntilIdle()
     viewModel.highlightObject("Sirius")
+
     viewModel.uiState.test {
       val state = awaitItem() as ResultsUiState.Content
       assertEquals("Sirius", state.highlightedObjectName)
@@ -93,10 +101,12 @@ class ResultsViewModelTest {
   fun `highlightObject clears when passed null`() = runTest {
     val solve = TestData.createSolve(objects = emptyList())
     coEvery { getSolveById(1L) } returns solve
+
     viewModel.loadFromId(1L)
     testDispatcher.scheduler.advanceUntilIdle()
     viewModel.highlightObject("Sirius")
     viewModel.highlightObject(null)
+
     viewModel.uiState.test {
       val state = awaitItem() as ResultsUiState.Content
       assertNull(state.highlightedObjectName)
@@ -107,11 +117,14 @@ class ResultsViewModelTest {
   fun `onObjectClick sets objectDetailState to Loading immediately`() = runTest {
     val solve = TestData.createSolve(objects = emptyList())
     val detail = ObjectDetail("Sirius", ObjectType.STAR, "Canis Major", "Brightest star")
+
     coEvery { getSolveById(1L) } returns solve
     coEvery { getObjectDetail("Sirius") } returns Result.success(detail)
+
     viewModel.loadFromId(1L)
     testDispatcher.scheduler.advanceUntilIdle()
     viewModel.onObjectClick("Sirius")
+
     viewModel.objectDetailState.test {
       val state = awaitItem()
       assertTrue(state is ObjectDetailState.Loading || state is ObjectDetailState.Loaded)
@@ -122,12 +135,15 @@ class ResultsViewModelTest {
   fun `onObjectClick sets objectDetailState to Loaded on success`() = runTest {
     val solve = TestData.createSolve(objects = emptyList())
     val detail = ObjectDetail("Sirius", ObjectType.STAR, "Canis Major", "Brightest star")
+
     coEvery { getSolveById(1L) } returns solve
     coEvery { getObjectDetail("Sirius") } returns Result.success(detail)
+
     viewModel.loadFromId(1L)
     testDispatcher.scheduler.advanceUntilIdle()
     viewModel.onObjectClick("Sirius")
     testDispatcher.scheduler.advanceUntilIdle()
+
     viewModel.objectDetailState.test {
       val state = awaitItem() as ObjectDetailState.Loaded
       assertEquals(detail, state.detail)
@@ -137,12 +153,15 @@ class ResultsViewModelTest {
   @Test
   fun `onObjectClick sets objectDetailState to Error on failure`() = runTest {
     val solve = TestData.createSolve(objects = emptyList())
+
     coEvery { getSolveById(1L) } returns solve
     coEvery { getObjectDetail("Unknown") } returns Result.failure(RuntimeException("Not found"))
+
     viewModel.loadFromId(1L)
     testDispatcher.scheduler.advanceUntilIdle()
     viewModel.onObjectClick("Unknown")
     testDispatcher.scheduler.advanceUntilIdle()
+
     viewModel.objectDetailState.test {
       val state = awaitItem() as ObjectDetailState.Error
       assertEquals("Not found", state.message)
@@ -153,12 +172,15 @@ class ResultsViewModelTest {
   fun `onObjectClick also highlights the object`() = runTest {
     val solve = TestData.createSolve(objects = emptyList())
     val detail = ObjectDetail("Sirius", ObjectType.STAR, "Canis Major", "Brightest star")
+
     coEvery { getSolveById(1L) } returns solve
     coEvery { getObjectDetail("Sirius") } returns Result.success(detail)
+
     viewModel.loadFromId(1L)
     testDispatcher.scheduler.advanceUntilIdle()
     viewModel.onObjectClick("Sirius")
     testDispatcher.scheduler.advanceUntilIdle()
+
     viewModel.uiState.test {
       val state = awaitItem() as ResultsUiState.Content
       assertEquals("Sirius", state.highlightedObjectName)
@@ -169,8 +191,10 @@ class ResultsViewModelTest {
   fun `dismissObjectDetail resets objectDetailState to Hidden`() = runTest {
     val solve = TestData.createSolve(objects = emptyList())
     val detail = ObjectDetail("Sirius", ObjectType.STAR, "Canis Major", "Brightest star")
+
     coEvery { getSolveById(1L) } returns solve
     coEvery { getObjectDetail("Sirius") } returns Result.success(detail)
+
     viewModel.loadFromId(1L)
     testDispatcher.scheduler.advanceUntilIdle()
     viewModel.onObjectClick("Sirius")
@@ -183,13 +207,16 @@ class ResultsViewModelTest {
   fun `dismissObjectDetail clears highlightedObjectName`() = runTest {
     val solve = TestData.createSolve(objects = emptyList())
     val detail = ObjectDetail("Sirius", ObjectType.STAR, "Canis Major", "Brightest star")
+
     coEvery { getSolveById(1L) } returns solve
     coEvery { getObjectDetail("Sirius") } returns Result.success(detail)
+
     viewModel.loadFromId(1L)
     testDispatcher.scheduler.advanceUntilIdle()
     viewModel.onObjectClick("Sirius")
     testDispatcher.scheduler.advanceUntilIdle()
     viewModel.dismissObjectDetail()
+
     viewModel.uiState.test {
       val state = awaitItem() as ResultsUiState.Content
       assertNull(state.highlightedObjectName)

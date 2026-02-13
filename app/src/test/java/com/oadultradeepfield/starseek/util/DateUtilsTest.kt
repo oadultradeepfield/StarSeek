@@ -9,6 +9,7 @@ class DateUtilsTest {
   @Test
   fun `formatRelativeDate returns Today for current timestamp`() {
     val now = System.currentTimeMillis()
+
     assertEquals("Today", formatRelativeDate(now))
   }
 
@@ -30,6 +31,7 @@ class DateUtilsTest {
   @Test
   fun `formatRelativeDate returns Yesterday for yesterday`() {
     val yesterday = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }.timeInMillis
+
     assertEquals("Yesterday", formatRelativeDate(yesterday))
   }
 
