@@ -29,7 +29,7 @@
     - [Screenshots](#screenshots)
     - [Tech Stack](#tech-stack)
     - [Features](#features)
-    - [Architecture](#architecture)
+    - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
