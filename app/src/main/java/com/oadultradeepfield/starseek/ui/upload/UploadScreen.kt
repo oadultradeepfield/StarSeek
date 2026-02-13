@@ -5,28 +5,32 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.oadultradeepfield.starseek.ui.components.ErrorState
 
 @Composable
 fun UploadScreen(viewModel: UploadViewModel, onNavigateToResults: (List<Long>) -> Unit) {
-  val uiState by viewModel.uiState.collectAsState()
+  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
   val launcher =
       rememberLauncherForActivityResult(
           contract = ActivityResultContracts.PickMultipleVisualMedia(UploadViewModel.MAX_IMAGES)
       ) { uris ->
         if (uris.isNotEmpty()) viewModel.onImagesSelected(uris)
       }
+
   val launchPicker = {
     launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
   }
+
   LaunchedEffect(uiState) {
     if (uiState is UploadUiState.Success) {
       onNavigateToResults((uiState as UploadUiState.Success).solveIds)
       viewModel.reset()
     }
   }
+
   when (val state = uiState) {
     is UploadUiState.Empty -> WelcomeState(onChoosePhoto = launchPicker)
     is UploadUiState.ImagesSelected ->

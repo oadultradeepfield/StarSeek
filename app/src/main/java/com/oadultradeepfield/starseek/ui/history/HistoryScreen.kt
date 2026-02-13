@@ -12,10 +12,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.oadultradeepfield.starseek.domain.model.CelestialObject
 import com.oadultradeepfield.starseek.domain.model.ObjectType
 import com.oadultradeepfield.starseek.domain.model.Solve
@@ -26,8 +26,9 @@ import com.oadultradeepfield.starseek.ui.theme.StarSeekTheme
 
 @Composable
 fun HistoryScreen(viewModel: HistoryViewModel, onSolveClick: (Long) -> Unit) {
-  val uiState by viewModel.uiState.collectAsState()
-  val deleteConfirmId by viewModel.deleteConfirmId.collectAsState()
+  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+  val deleteConfirmId by viewModel.deleteConfirmId.collectAsStateWithLifecycle()
+
   when (val state = uiState) {
     is HistoryUiState.Loading -> LoadingIndicator(Modifier.fillMaxSize())
     is HistoryUiState.Empty ->
@@ -116,6 +117,7 @@ private fun HistoryListPreview() {
                 timestamp = System.currentTimeMillis() - 86400000,
             ),
         )
+
     HistoryList(solves = solves, count = solves.size, onSolveClick = {}, onDeleteClick = {})
   }
 }

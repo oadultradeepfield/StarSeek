@@ -20,13 +20,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.oadultradeepfield.starseek.domain.model.Solve
 import com.oadultradeepfield.starseek.ui.components.ErrorState
 import com.oadultradeepfield.starseek.ui.components.LoadingIndicator
@@ -37,8 +37,8 @@ import com.oadultradeepfield.starseek.ui.theme.Dimens
 fun ResultsScreen(viewModel: ResultsViewModel, solveIds: List<Long>, onNavigateBack: () -> Unit) {
   var currentIndex by rememberSaveable { mutableIntStateOf(0) }
   val currentSolveId = solveIds.getOrNull(currentIndex) ?: solveIds.first()
-  val uiState by viewModel.uiState.collectAsState()
-  val objectDetailState by viewModel.objectDetailState.collectAsState()
+  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+  val objectDetailState by viewModel.objectDetailState.collectAsStateWithLifecycle()
   LaunchedEffect(currentSolveId) { viewModel.loadFromId(currentSolveId) }
   Column(modifier = Modifier.fillMaxSize()) {
     TopAppBar(
