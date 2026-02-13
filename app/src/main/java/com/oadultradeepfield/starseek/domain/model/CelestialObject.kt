@@ -10,3 +10,7 @@ data class CelestialObject(
     val pixelX: Double? = null,
     val pixelY: Double? = null,
 )
+
+fun List<CelestialObject>.groupByConstellation():
+    Map<String, Map<ObjectType, List<CelestialObject>>> =
+    groupBy { it.constellation }.mapValues { (_, objects) -> objects.groupBy { it.type } }
