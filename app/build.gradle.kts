@@ -19,6 +19,7 @@ android {
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     buildConfigField("String", "API_BASE_URL", "\"https://starseek-api.phanuphats.com/\"")
+    buildConfigField("boolean", "ENABLE_IMAGE_ENHANCEMENT", "false")
   }
 
   buildTypes {

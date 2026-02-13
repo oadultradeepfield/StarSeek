@@ -5,8 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed class NavRoutes {
   @Serializable data object Upload : NavRoutes()
-
   @Serializable data object History : NavRoutes()
-
   @Serializable data class Results(val solveIds: String) : NavRoutes()
+  @Serializable data object ImageDebug : NavRoutes()
 }

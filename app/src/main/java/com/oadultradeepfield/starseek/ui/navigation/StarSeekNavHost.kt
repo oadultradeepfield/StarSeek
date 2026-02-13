@@ -11,6 +11,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.oadultradeepfield.starseek.BuildConfig
+import com.oadultradeepfield.starseek.ui.debug.ImageDebugScreen
 import com.oadultradeepfield.starseek.ui.history.HistoryScreen
 import com.oadultradeepfield.starseek.ui.results.ResultsScreen
 import com.oadultradeepfield.starseek.ui.upload.UploadScreen
@@ -78,6 +80,9 @@ fun StarSeekNavHost(navController: NavHostController, modifier: Modifier = Modif
           solveIds = solveIds,
           onNavigateBack = { navController.popBackStack() },
       )
+    }
+    if (BuildConfig.DEBUG) {
+      composable<NavRoutes.ImageDebug> { ImageDebugScreen() }
     }
   }
 }
