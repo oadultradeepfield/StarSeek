@@ -1,4 +1,4 @@
-package com.oadultradeepfield.starseek.image
+package com.oadultradeepfield.starseek.data.image
 
 import coil3.EventListener
 import coil3.request.ErrorResult

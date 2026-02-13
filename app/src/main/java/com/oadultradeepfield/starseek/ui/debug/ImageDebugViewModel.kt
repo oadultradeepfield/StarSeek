@@ -1,7 +1,7 @@
 package com.oadultradeepfield.starseek.ui.debug
 
 import androidx.lifecycle.ViewModel
-import com.oadultradeepfield.starseek.image.ImageLoadingMetrics
+import com.oadultradeepfield.starseek.data.image.ImageLoadingMetrics
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

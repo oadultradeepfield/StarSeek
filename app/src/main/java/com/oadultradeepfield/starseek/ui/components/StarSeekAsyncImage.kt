@@ -15,7 +15,7 @@ import coil3.request.ImageRequest
 import coil3.request.bitmapConfig
 import coil3.request.transformations
 import coil3.size.Size
-import com.oadultradeepfield.starseek.image.StarFieldTransformation
+import com.oadultradeepfield.starseek.data.image.StarFieldTransformation
 
 enum class ImagePreset(
     val sizeDp: Int?,
