@@ -50,9 +50,11 @@ class HistoryViewModelTest {
     every { repository.getAllSolves() } returns flowOf(solves)
 
     val viewModel = HistoryViewModel(repository, imageProcessor)
-    testDispatcher.scheduler.advanceUntilIdle()
 
-    viewModel.uiState.test { assertEquals(HistoryUiState.Content(solves), awaitItem()) }
+    viewModel.uiState.test {
+      assertEquals(HistoryUiState.Loading, awaitItem())
+      assertEquals(HistoryUiState.Content(solves), awaitItem())
+    }
   }
 
   @Test
@@ -60,9 +62,11 @@ class HistoryViewModelTest {
     every { repository.getAllSolves() } returns flowOf(emptyList())
 
     val viewModel = HistoryViewModel(repository, imageProcessor)
-    testDispatcher.scheduler.advanceUntilIdle()
 
-    viewModel.uiState.test { assertEquals(HistoryUiState.Empty, awaitItem()) }
+    viewModel.uiState.test {
+      assertEquals(HistoryUiState.Loading, awaitItem())
+      assertEquals(HistoryUiState.Empty, awaitItem())
+    }
   }
 
   @Test
