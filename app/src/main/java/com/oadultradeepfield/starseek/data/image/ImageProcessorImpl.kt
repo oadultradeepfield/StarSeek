@@ -1,4 +1,4 @@
-package com.oadultradeepfield.starseek.data
+package com.oadultradeepfield.starseek.data.image
 
 import android.content.Context
 import android.graphics.Bitmap

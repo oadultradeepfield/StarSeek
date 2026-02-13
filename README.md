@@ -83,6 +83,7 @@ stars, nebulae, galaxies, and star clusters visible in the frame.
 ```
 ├── app/                    # Android application
 │   ├── data/
+│   │   ├── image/          # Image loading, processing, transformations
 │   │   ├── local/          # Room database, DAOs, entities
 │   │   ├── remote/         # Retrofit API, DTOs
 │   │   ├── repository/     # Repository implementations
@@ -96,6 +97,7 @@ stars, nebulae, galaxies, and star clusters visible in the frame.
 │       ├── upload/         # Image upload screen
 │       ├── results/        # Solve results screen
 │       ├── history/        # History screen
+│       ├── debug/          # Debug screens (image benchmarking)
 │       └── navigation/     # Navigation setup
 └── backend/
     └── container_src/      # Go API server

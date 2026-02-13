@@ -1,6 +1,6 @@
 package com.oadultradeepfield.starseek.di
 
-import com.oadultradeepfield.starseek.data.ImageProcessorImpl
+import com.oadultradeepfield.starseek.data.image.ImageProcessorImpl
 import com.oadultradeepfield.starseek.data.repository.SolveRepositoryImpl
 import com.oadultradeepfield.starseek.domain.repository.ImageProcessor
 import com.oadultradeepfield.starseek.domain.repository.SolveRepository
