@@ -40,8 +40,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
+import com.oadultradeepfield.starseek.ui.components.ImagePreset
 import com.oadultradeepfield.starseek.ui.components.LoadingIndicator
+import com.oadultradeepfield.starseek.ui.components.StarSeekAsyncImage
 import com.oadultradeepfield.starseek.ui.theme.Dimens
 import com.oadultradeepfield.starseek.ui.theme.StarSeekTheme
 
@@ -54,12 +55,14 @@ internal fun ImagesSelectedState(
   ImageSelectedContent(
       image = {
         Box {
-          AsyncImage(
+          StarSeekAsyncImage(
               model = uris.first(),
               contentDescription = "Selected image",
               modifier = Modifier.size(Dimens.thumbnailSizeLarge).clip(MaterialTheme.shapes.large),
+              preset = ImagePreset.THUMBNAIL_LARGE,
               contentScale = ContentScale.Crop,
           )
+
           if (uris.size > 1) {
             Box(
                 modifier =
@@ -94,7 +97,9 @@ private fun ImageSelectedContent(
       verticalArrangement = Arrangement.Center,
   ) {
     image()
+
     Spacer(modifier = Modifier.height(Dimens.spacingXLarge))
+
     Button(onClick = onUploadClick, modifier = Modifier.fillMaxWidth()) {
       Icon(
           imageVector = Icons.Default.Search,
@@ -104,7 +109,9 @@ private fun ImageSelectedContent(
       Spacer(modifier = Modifier.width(Dimens.spacingMedium))
       Text(text = "Identify Stars", style = MaterialTheme.typography.labelLarge)
     }
+
     Spacer(modifier = Modifier.height(Dimens.spacingXSmall))
+
     OutlinedButton(onClick = onChangeClick, modifier = Modifier.fillMaxWidth()) {
       Icon(
           imageVector = Icons.Default.Edit,
@@ -129,12 +136,14 @@ internal fun MultiImageLoadingState(items: List<ImageProcessingItem>) {
       verticalArrangement = Arrangement.Center,
   ) {
     Box(contentAlignment = Alignment.Center) {
-      AsyncImage(
+      StarSeekAsyncImage(
           model = currentItem.uri,
           contentDescription = "Processing image",
           modifier = Modifier.size(Dimens.thumbnailSizeLarge).clip(MaterialTheme.shapes.large),
+          preset = ImagePreset.THUMBNAIL_LARGE,
           contentScale = ContentScale.Crop,
       )
+
       if (items.size > 1) {
         Text(
             text = "${currentIndex + 1}/${items.size}",
@@ -149,6 +158,7 @@ internal fun MultiImageLoadingState(items: List<ImageProcessingItem>) {
                     )
                     .padding(horizontal = Dimens.spacingSmall, vertical = Dimens.spacingXSmall),
         )
+
         if (currentIndex > 0) {
           IconButton(
               onClick = { currentIndex-- },
@@ -161,6 +171,7 @@ internal fun MultiImageLoadingState(items: List<ImageProcessingItem>) {
             Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Previous")
           }
         }
+
         if (currentIndex < items.size - 1) {
           IconButton(
               onClick = { currentIndex++ },
@@ -175,6 +186,7 @@ internal fun MultiImageLoadingState(items: List<ImageProcessingItem>) {
         }
       }
     }
+
     Spacer(modifier = Modifier.height(Dimens.spacingLarge))
     ImageStatusIndicator(status = currentItem.status)
   }
@@ -262,6 +274,7 @@ private fun MultiImageLoadingStatePreview() {
                 .clip(MaterialTheme.shapes.large)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
         )
+
         Text(
             text = "1/3",
             style = MaterialTheme.typography.labelMedium,
@@ -275,6 +288,7 @@ private fun MultiImageLoadingStatePreview() {
                     )
                     .padding(horizontal = Dimens.spacingSmall, vertical = Dimens.spacingXSmall),
         )
+
         IconButton(
             onClick = {},
             modifier = Modifier.align(Alignment.CenterEnd).offset(x = 48.dp),
@@ -286,7 +300,9 @@ private fun MultiImageLoadingStatePreview() {
           Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Next")
         }
       }
+
       Spacer(modifier = Modifier.height(Dimens.spacingLarge))
+
       Row(
           horizontalArrangement = Arrangement.Center,
           verticalAlignment = Alignment.CenterVertically,

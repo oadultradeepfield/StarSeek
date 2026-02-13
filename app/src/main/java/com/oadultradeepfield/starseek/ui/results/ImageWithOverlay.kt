@@ -21,15 +21,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
-import coil3.request.ImageRequest
-import coil3.size.Size
 import com.oadultradeepfield.starseek.domain.model.CelestialObject
+import com.oadultradeepfield.starseek.ui.components.ImagePreset
+import com.oadultradeepfield.starseek.ui.components.StarSeekAsyncImage
 
 @Composable
 fun ImageWithOverlay(
@@ -49,7 +47,6 @@ fun ImageWithOverlay(
           animationSpec = infiniteRepeatable(tween(800), RepeatMode.Reverse),
           label = "glowAlpha",
       )
-  val context = LocalContext.current
   val aspectRatio =
       if (intrinsicWidth > 0 && intrinsicHeight > 0) {
         intrinsicWidth.toFloat() / intrinsicHeight
@@ -57,10 +54,11 @@ fun ImageWithOverlay(
         4f / 3f
       }
   Box(modifier = modifier.aspectRatio(aspectRatio)) {
-    AsyncImage(
-        model = ImageRequest.Builder(context).data(imageUri.toUri()).size(Size.ORIGINAL).build(),
+    StarSeekAsyncImage(
+        model = imageUri.toUri(),
         contentDescription = "Star field image showing ${objects.size} celestial objects",
         modifier = Modifier.fillMaxSize().onGloballyPositioned { displayedSize = it.size },
+        preset = ImagePreset.FULL,
         contentScale = ContentScale.FillWidth,
         onState = { state ->
           if (state is AsyncImagePainter.State.Success) {

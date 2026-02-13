@@ -29,9 +29,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
-import coil3.compose.AsyncImage
 import com.oadultradeepfield.starseek.domain.model.CelestialObject
 import com.oadultradeepfield.starseek.domain.model.Solve
+import com.oadultradeepfield.starseek.ui.components.ImagePreset
+import com.oadultradeepfield.starseek.ui.components.StarSeekAsyncImage
 import com.oadultradeepfield.starseek.ui.theme.Dimens
 import com.oadultradeepfield.starseek.ui.theme.StarSeekTheme
 import com.oadultradeepfield.starseek.util.formatRelativeDate
@@ -40,15 +41,17 @@ import com.oadultradeepfield.starseek.util.formatRelativeDate
 internal fun HistoryItem(solve: Solve, onClick: () -> Unit, onDeleteClick: () -> Unit) {
   val summary by
       remember(solve.objects) { derivedStateOf { computeConstellationSummary(solve.objects) } }
+
   HistoryItemContent(
       summary = summary,
       objectCount = solve.objects.size,
       timestamp = solve.timestamp,
       image = {
-        AsyncImage(
+        StarSeekAsyncImage(
             model = solve.imageUri,
             contentDescription = "Thumbnail for $summary",
             modifier = Modifier.size(Dimens.thumbnailSizeSmall).clip(MaterialTheme.shapes.small),
+            preset = ImagePreset.THUMBNAIL_SMALL,
             contentScale = ContentScale.Crop,
         )
       },
@@ -67,6 +70,7 @@ private fun HistoryItemContent(
     onDeleteClick: () -> Unit,
 ) {
   val itemDescription = "$summary, $objectCount objects, ${formatRelativeDate(timestamp)}"
+
   Card(
       modifier =
           Modifier.fillMaxWidth()
@@ -102,6 +106,7 @@ private fun HistoryItemContent(
 
 internal fun computeConstellationSummary(objects: List<CelestialObject>): String {
   val constellations = objects.map { it.constellation }.distinct()
+
   return when {
     constellations.isEmpty() -> "Cannot Identify"
     constellations.size == 1 -> constellations.first()
