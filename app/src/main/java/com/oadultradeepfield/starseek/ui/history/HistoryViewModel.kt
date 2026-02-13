@@ -1,10 +1,9 @@
 package com.oadultradeepfield.starseek.ui.history
 
-import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.oadultradeepfield.starseek.domain.repository.ImageProcessor
-import com.oadultradeepfield.starseek.domain.repository.SolveRepository
+import com.oadultradeepfield.starseek.domain.usecase.DeleteSolveWithImageUseCase
+import com.oadultradeepfield.starseek.domain.usecase.ObserveSolvesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,12 +18,11 @@ import javax.inject.Inject
 class HistoryViewModel
 @Inject
 constructor(
-    private val repository: SolveRepository,
-    private val imageProcessor: ImageProcessor,
+    observeSolves: ObserveSolvesUseCase,
+    private val deleteSolveWithImage: DeleteSolveWithImageUseCase,
 ) : ViewModel() {
   val uiState: StateFlow<HistoryUiState> =
-      repository
-          .getAllSolves()
+      observeSolves()
           .map { solves ->
             if (solves.isEmpty()) HistoryUiState.Empty else HistoryUiState.Content(solves)
           }
@@ -45,13 +43,7 @@ constructor(
     val id = _deleteConfirmId.value ?: return
 
     viewModelScope.launch {
-      val solve = repository.getSolveById(id)
-
-      solve?.let {
-        imageProcessor.deleteImage(it.imageUri.toUri())
-        repository.deleteSolve(id)
-      }
-
+      deleteSolveWithImage(id)
       _deleteConfirmId.update { null }
     }
   }

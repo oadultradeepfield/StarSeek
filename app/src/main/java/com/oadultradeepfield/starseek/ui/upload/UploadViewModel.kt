@@ -3,18 +3,14 @@ package com.oadultradeepfield.starseek.ui.upload
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.oadultradeepfield.starseek.domain.model.JobStatus
-import com.oadultradeepfield.starseek.domain.repository.ImageProcessor
-import com.oadultradeepfield.starseek.domain.repository.SolveRepository
+import com.oadultradeepfield.starseek.domain.usecase.ProcessAndUploadImageUseCase
+import com.oadultradeepfield.starseek.domain.usecase.model.UploadProgress
+import com.oadultradeepfield.starseek.domain.usecase.model.UploadResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
@@ -26,27 +22,25 @@ import javax.inject.Inject
 class UploadViewModel
 @Inject
 constructor(
-    private val repository: SolveRepository,
-    private val imageProcessor: ImageProcessor,
+    private val processAndUploadImage: ProcessAndUploadImageUseCase,
 ) : ViewModel() {
   private val _uiState = MutableStateFlow<UploadUiState>(UploadUiState.Empty)
+
   val uiState: StateFlow<UploadUiState> = _uiState
 
-  private val pollingJobs = mutableMapOf<Uri, Job>()
+  private val uploadJobs = mutableMapOf<Uri, Job>()
   private val imageStatuses = mutableMapOf<Uri, ImageStatus>()
   private val statusMutex = Mutex()
   private val uploadSemaphore = Semaphore(MAX_CONCURRENT_UPLOADS)
 
   fun onImagesSelected(uris: List<Uri>) {
-    cancelAllPolling()
+    cancelAllUploads()
     imageStatuses.clear()
-
     _uiState.update { UploadUiState.ImagesSelected(uris) }
   }
 
   fun onUploadClick() {
     val currentState = _uiState.value
-
     if (currentState !is UploadUiState.ImagesSelected) return
 
     startUploads(currentState.uris)
@@ -70,85 +64,31 @@ constructor(
     updateProcessingState()
 
     uris.forEach { uri ->
-      viewModelScope.launch { uploadSemaphore.withPermit { processImage(uri) } }
+      uploadJobs[uri] = viewModelScope.launch { uploadSemaphore.withPermit { processImage(uri) } }
     }
   }
 
   private suspend fun processImage(uri: Uri) {
-    try {
-      updateImageStatus(uri, ImageStatus.Processing("Checking cache..."))
-
-      val imageBytes = imageProcessor.readBytes(uri)
-      val imageHash = imageProcessor.computeHash(imageBytes)
-      val cached = repository.getCachedSolve(imageHash)
-
-      if (cached != null) {
-        updateImageStatus(uri, ImageStatus.Completed(cached.id))
-        checkAllCompleted()
-        return
-      }
-
-      val internalUri = imageProcessor.copyToInternalStorage(imageBytes)
-
-      updateImageStatus(uri, ImageStatus.Processing("Uploading..."))
-
-      val compressedBytes = imageProcessor.compressForUpload(imageBytes)
-      val result = repository.uploadImage(compressedBytes, "image.jpg")
-
-      result.fold(
-          onSuccess = { jobId ->
-            updateImageStatus(uri, ImageStatus.Processing("Analyzing stars..."))
-            pollJobStatus(jobId, uri, internalUri, imageHash)
-          },
-          onFailure = { e ->
-            updateImageStatus(uri, ImageStatus.Failed(e.message ?: "Upload failed"))
-            checkAllCompleted()
-          },
-      )
-    } catch (e: Exception) {
-      updateImageStatus(uri, ImageStatus.Failed(e.message ?: "Failed to process image"))
-      checkAllCompleted()
-    }
-  }
-
-  private fun pollJobStatus(jobId: String, originalUri: Uri, imageUri: Uri, imageHash: String) {
-    pollingJobs[originalUri]?.cancel()
-
-    pollingJobs[originalUri] =
-        viewModelScope.launch {
-          while (currentCoroutineContext().isActive) {
-            delay(5000)
-            currentCoroutineContext().ensureActive()
-
-            val result = repository.getJobStatus(jobId)
-
-            result.fold(
-                onSuccess = { status ->
-                  when (status) {
-                    is JobStatus.Processing -> {}
-                    is JobStatus.Success -> {
-                      val solve =
-                          status.solve.copy(imageUri = imageUri.toString(), imageHash = imageHash)
-                      val id = repository.saveSolve(solve)
-                      updateImageStatus(originalUri, ImageStatus.Completed(id))
-                      checkAllCompleted()
-                      return@launch
-                    }
-                    is JobStatus.Failed -> {
-                      updateImageStatus(originalUri, ImageStatus.Failed(status.error))
-                      checkAllCompleted()
-                      return@launch
-                    }
-                  }
-                },
-                onFailure = { e ->
-                  updateImageStatus(originalUri, ImageStatus.Failed(e.message ?: "Polling failed"))
-                  checkAllCompleted()
-                  return@launch
-                },
-            )
-          }
+    val result =
+        processAndUploadImage(uri) { progress ->
+          val message =
+              when (progress) {
+                UploadProgress.CheckingCache -> "Checking cache..."
+                UploadProgress.Uploading -> "Uploading..."
+                UploadProgress.Analyzing -> "Analyzing stars..."
+              }
+          viewModelScope.launch { updateImageStatus(uri, ImageStatus.Processing(message)) }
         }
+
+    val status =
+        when (result) {
+          is UploadResult.CacheHit -> ImageStatus.Completed(result.solveId)
+          is UploadResult.Success -> ImageStatus.Completed(result.solveId)
+          is UploadResult.Failure -> ImageStatus.Failed(result.error)
+        }
+
+    updateImageStatus(uri, status)
+    checkAllCompleted()
   }
 
   private suspend fun updateImageStatus(uri: Uri, status: ImageStatus) {
@@ -183,13 +123,13 @@ constructor(
     }
   }
 
-  private fun cancelAllPolling() {
-    pollingJobs.values.forEach { it.cancel() }
-    pollingJobs.clear()
+  private fun cancelAllUploads() {
+    uploadJobs.values.forEach { it.cancel() }
+    uploadJobs.clear()
   }
 
   fun reset() {
-    cancelAllPolling()
+    cancelAllUploads()
     imageStatuses.clear()
     _uiState.update { UploadUiState.Empty }
   }

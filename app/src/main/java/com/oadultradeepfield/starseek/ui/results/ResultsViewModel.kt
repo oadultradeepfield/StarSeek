@@ -2,7 +2,9 @@ package com.oadultradeepfield.starseek.ui.results
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.oadultradeepfield.starseek.domain.repository.SolveRepository
+import com.oadultradeepfield.starseek.domain.model.groupByConstellation
+import com.oadultradeepfield.starseek.domain.usecase.GetObjectDetailUseCase
+import com.oadultradeepfield.starseek.domain.usecase.GetSolveByIdUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,7 +13,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ResultsViewModel @Inject constructor(private val repository: SolveRepository) : ViewModel() {
+class ResultsViewModel
+@Inject
+constructor(
+    private val getSolveById: GetSolveByIdUseCase,
+    private val getObjectDetail: GetObjectDetailUseCase,
+) : ViewModel() {
   private val _uiState = MutableStateFlow<ResultsUiState>(ResultsUiState.Loading)
   val uiState: StateFlow<ResultsUiState> = _uiState
 
@@ -20,11 +27,11 @@ class ResultsViewModel @Inject constructor(private val repository: SolveReposito
 
   fun loadFromId(solveId: Long) {
     viewModelScope.launch {
-      val solve = repository.getSolveById(solveId)
+      val solve = getSolveById(solveId)
 
       _uiState.update {
         if (solve != null) {
-          ResultsUiState.Content(solve, groupObjects(solve))
+          ResultsUiState.Content(solve, GroupedObjects(solve.objects.groupByConstellation()))
         } else {
           ResultsUiState.Error("Solve not found")
         }
@@ -34,9 +41,7 @@ class ResultsViewModel @Inject constructor(private val repository: SolveReposito
 
   fun highlightObject(name: String?) {
     _uiState.update { current ->
-      if (current is ResultsUiState.Content) {
-        current.copy(highlightedObjectName = name)
-      } else current
+      if (current is ResultsUiState.Content) current.copy(highlightedObjectName = name) else current
     }
   }
 
@@ -45,8 +50,7 @@ class ResultsViewModel @Inject constructor(private val repository: SolveReposito
     _objectDetailState.update { ObjectDetailState.Loading }
 
     viewModelScope.launch {
-      repository
-          .getObjectDetail(objectName)
+      getObjectDetail(objectName)
           .fold(
               onSuccess = { detail ->
                 _objectDetailState.update { ObjectDetailState.Loaded(detail) }
@@ -63,16 +67,5 @@ class ResultsViewModel @Inject constructor(private val repository: SolveReposito
   fun dismissObjectDetail() {
     highlightObject(null)
     _objectDetailState.update { ObjectDetailState.Hidden }
-  }
-
-  private fun groupObjects(
-      solve: com.oadultradeepfield.starseek.domain.model.Solve
-  ): GroupedObjects {
-    val grouped =
-        solve.objects
-            .groupBy { it.constellation }
-            .mapValues { (_, objects) -> objects.groupBy { it.type } }
-
-    return GroupedObjects(grouped)
   }
 }
