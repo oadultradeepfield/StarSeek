@@ -7,6 +7,7 @@ import com.oadultradeepfield.starseek.domain.model.JobStatus
 import com.oadultradeepfield.starseek.domain.repository.ImageProcessor
 import com.oadultradeepfield.starseek.domain.repository.SolveRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -20,7 +21,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
-import javax.inject.Inject
 
 @HiltViewModel
 class UploadViewModel
@@ -72,15 +72,18 @@ constructor(
       val imageBytes = imageProcessor.readBytes(uri)
       val imageHash = imageProcessor.computeHash(imageBytes)
       val cached = repository.getCachedSolve(imageHash)
+
       if (cached != null) {
         updateImageStatus(uri, ImageStatus.Completed(cached.id))
         checkAllCompleted()
         return
       }
+
       val internalUri = imageProcessor.copyToInternalStorage(imageBytes)
       updateImageStatus(uri, ImageStatus.Processing("Uploading..."))
       val compressedBytes = imageProcessor.compressForUpload(imageBytes)
       val result = repository.uploadImage(compressedBytes, "image.jpg")
+
       result.fold(
           onSuccess = { jobId ->
             updateImageStatus(uri, ImageStatus.Processing("Analyzing stars..."))
@@ -105,6 +108,7 @@ constructor(
             delay(5000)
             currentCoroutineContext().ensureActive()
             val result = repository.getJobStatus(jobId)
+
             result.fold(
                 onSuccess = { status ->
                   when (status) {
@@ -150,10 +154,14 @@ constructor(
     statusMutex.withLock {
       val allDone =
           imageStatuses.values.all { it is ImageStatus.Completed || it is ImageStatus.Failed }
+
       if (!allDone) return
+
       val successIds =
           imageStatuses.values.filterIsInstance<ImageStatus.Completed>().map { it.solveId }
+
       val failures = imageStatuses.values.filterIsInstance<ImageStatus.Failed>()
+
       if (successIds.isNotEmpty()) {
         _uiState.update { UploadUiState.Success(successIds) }
       } else if (failures.isNotEmpty()) {

@@ -39,15 +39,20 @@ internal fun WelcomeState(onChoosePhoto: () -> Unit) {
         modifier = Modifier.size(Dimens.thumbnailSizeMedium),
         tint = MaterialTheme.colorScheme.primary,
     )
+
     Text("StarSeek", style = MaterialTheme.typography.headlineLarge)
+
     Spacer(modifier = Modifier.height(Dimens.spacingSmall))
+
     Text(
         "Unlock the hidden wonders within your night-sky captures.",
         style = MaterialTheme.typography.bodyLarge,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
     )
+
     Spacer(modifier = Modifier.height(Dimens.spacingLarge))
+
     Button(onClick = onChoosePhoto, modifier = Modifier.fillMaxWidth()) {
       Icon(
           imageVector = Icons.Default.CameraAlt,
