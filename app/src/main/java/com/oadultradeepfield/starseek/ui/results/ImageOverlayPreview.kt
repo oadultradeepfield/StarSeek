@@ -34,6 +34,7 @@ internal fun ImageOverlayPreviewContent(
     modifier: Modifier = Modifier,
 ) {
   val infiniteTransition = rememberInfiniteTransition(label = "glow")
+
   val glowAlpha by
       infiniteTransition.animateFloat(
           initialValue = 0.3f,
@@ -41,16 +42,20 @@ internal fun ImageOverlayPreviewContent(
           animationSpec = infiniteRepeatable(tween(800), RepeatMode.Reverse),
           label = "glowAlpha",
       )
+
   Box(modifier = modifier.clip(MaterialTheme.shapes.medium)) {
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant))
     Canvas(modifier = Modifier.fillMaxSize()) {
       objects.forEach { obj ->
         val px = obj.pixelX ?: return@forEach
         val py = obj.pixelY ?: return@forEach
+
         val isHighlighted = obj.name == highlightedName
+
         val alpha = if (isHighlighted) glowAlpha else 0.7f
         val radius = if (isHighlighted) 18.dp.toPx() else 14.dp.toPx()
         val center = Offset(px.toFloat(), py.toFloat())
+
         drawCircle(
             brush =
                 Brush.radialGradient(
@@ -82,6 +87,7 @@ private fun ImageWithOverlayPreview() {
             CelestialObject("Rigel", ObjectType.STAR, "Orion", 200.0, 150.0),
             CelestialObject("Polaris", ObjectType.STAR, "Ursa Minor", 150.0, 50.0),
         )
+
     ImageOverlayPreviewContent(
         objects = objects,
         highlightedName = "Betelgeuse",

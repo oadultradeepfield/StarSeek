@@ -39,7 +39,9 @@ fun ResultsScreen(viewModel: ResultsViewModel, solveIds: List<Long>, onNavigateB
   val currentSolveId = solveIds.getOrNull(currentIndex) ?: solveIds.first()
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   val objectDetailState by viewModel.objectDetailState.collectAsStateWithLifecycle()
+
   LaunchedEffect(currentSolveId) { viewModel.loadFromId(currentSolveId) }
+
   Column(modifier = Modifier.fillMaxSize()) {
     TopAppBar(
         title = { Text("Results") },
@@ -100,6 +102,7 @@ private fun ImageWithNavigation(
         highlightedName = highlightedName,
         modifier = Modifier.fillMaxWidth(),
     )
+
     if (currentIndex > 0) {
       IconButton(
           onClick = onPrevious,
@@ -112,6 +115,7 @@ private fun ImageWithNavigation(
         Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Previous image")
       }
     }
+
     if (currentIndex < totalCount - 1) {
       IconButton(
           onClick = onNext,
@@ -124,6 +128,7 @@ private fun ImageWithNavigation(
         Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Next image")
       }
     }
+
     Text(
         text = "${currentIndex + 1}/$totalCount",
         style = MaterialTheme.typography.labelMedium,
@@ -144,6 +149,7 @@ internal fun ResultsContent(
     imageSlot: (@Composable () -> Unit)? = null,
 ) {
   val listState = rememberLazyListState()
+
   Column(modifier = modifier.fillMaxSize()) {
     if (imageSlot != null) {
       imageSlot()
@@ -155,6 +161,7 @@ internal fun ResultsContent(
           modifier = Modifier.fillMaxWidth(),
       )
     }
+
     ObjectList(
         grouped = grouped,
         objectCount = solve.objects.size,

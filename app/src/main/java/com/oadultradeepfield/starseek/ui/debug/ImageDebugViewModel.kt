@@ -6,12 +6,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class ImageDebugViewModel @Inject constructor(
+class ImageDebugViewModel
+@Inject
+constructor(
     private val imageLoadingMetrics: ImageLoadingMetrics,
 ) : ViewModel() {
-    val metrics = imageLoadingMetrics.metrics
+  val metrics = imageLoadingMetrics.metrics
 
-    fun resetMetrics() {
-        imageLoadingMetrics.reset()
-    }
+  fun resetMetrics() {
+    imageLoadingMetrics.reset()
+  }
 }

@@ -7,7 +7,6 @@ import com.oadultradeepfield.starseek.domain.model.JobStatus
 import com.oadultradeepfield.starseek.domain.repository.ImageProcessor
 import com.oadultradeepfield.starseek.domain.repository.SolveRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -21,6 +20,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
+import javax.inject.Inject
 
 @HiltViewModel
 class UploadViewModel
@@ -40,27 +40,35 @@ constructor(
   fun onImagesSelected(uris: List<Uri>) {
     cancelAllPolling()
     imageStatuses.clear()
+
     _uiState.update { UploadUiState.ImagesSelected(uris) }
   }
 
   fun onUploadClick() {
     val currentState = _uiState.value
+
     if (currentState !is UploadUiState.ImagesSelected) return
+
     startUploads(currentState.uris)
   }
 
   fun retry() {
     val currentState = _uiState.value
     if (currentState !is UploadUiState.Error) return
+
     val uris = currentState.lastUris ?: return
+
     _uiState.update { UploadUiState.ImagesSelected(uris) }
+
     startUploads(uris)
   }
 
   private fun startUploads(uris: List<Uri>) {
     imageStatuses.clear()
     uris.forEach { uri -> imageStatuses[uri] = ImageStatus.Pending }
+
     updateProcessingState()
+
     uris.forEach { uri ->
       viewModelScope.launch { uploadSemaphore.withPermit { processImage(uri) } }
     }
@@ -69,6 +77,7 @@ constructor(
   private suspend fun processImage(uri: Uri) {
     try {
       updateImageStatus(uri, ImageStatus.Processing("Checking cache..."))
+
       val imageBytes = imageProcessor.readBytes(uri)
       val imageHash = imageProcessor.computeHash(imageBytes)
       val cached = repository.getCachedSolve(imageHash)
@@ -80,7 +89,9 @@ constructor(
       }
 
       val internalUri = imageProcessor.copyToInternalStorage(imageBytes)
+
       updateImageStatus(uri, ImageStatus.Processing("Uploading..."))
+
       val compressedBytes = imageProcessor.compressForUpload(imageBytes)
       val result = repository.uploadImage(compressedBytes, "image.jpg")
 
@@ -102,11 +113,13 @@ constructor(
 
   private fun pollJobStatus(jobId: String, originalUri: Uri, imageUri: Uri, imageHash: String) {
     pollingJobs[originalUri]?.cancel()
+
     pollingJobs[originalUri] =
         viewModelScope.launch {
           while (currentCoroutineContext().isActive) {
             delay(5000)
             currentCoroutineContext().ensureActive()
+
             val result = repository.getJobStatus(jobId)
 
             result.fold(

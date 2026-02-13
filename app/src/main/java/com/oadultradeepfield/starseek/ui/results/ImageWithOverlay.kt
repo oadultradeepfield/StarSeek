@@ -40,6 +40,7 @@ fun ImageWithOverlay(
   var intrinsicWidth by remember { mutableIntStateOf(0) }
   var intrinsicHeight by remember { mutableIntStateOf(0) }
   val infiniteTransition = rememberInfiniteTransition(label = "glow")
+
   val glowAlpha by
       infiniteTransition.animateFloat(
           initialValue = 0.3f,
@@ -47,12 +48,14 @@ fun ImageWithOverlay(
           animationSpec = infiniteRepeatable(tween(800), RepeatMode.Reverse),
           label = "glowAlpha",
       )
+
   val aspectRatio =
       if (intrinsicWidth > 0 && intrinsicHeight > 0) {
         intrinsicWidth.toFloat() / intrinsicHeight
       } else {
         4f / 3f
       }
+
   Box(modifier = modifier.aspectRatio(aspectRatio)) {
     StarSeekAsyncImage(
         model = imageUri.toUri(),
@@ -67,23 +70,29 @@ fun ImageWithOverlay(
           }
         },
     )
+
     if (displayedSize != IntSize.Zero && intrinsicWidth > 0 && intrinsicHeight > 0) {
       val transform =
           remember(displayedSize, intrinsicWidth) {
             computeCoordinateTransform(displayedSize, intrinsicWidth)
           }
+
       Canvas(modifier = Modifier.fillMaxSize()) {
         objects.forEach { obj ->
           val px = obj.pixelX ?: return@forEach
           val py = obj.pixelY ?: return@forEach
+
           val isHighlighted = obj.name == highlightedName
+
           val alpha = if (isHighlighted) glowAlpha else 0.7f
           val radius = if (isHighlighted) 18.dp.toPx() else 14.dp.toPx()
+
           val center =
               Offset(
                   (px * transform.scale + transform.offsetX).toFloat(),
                   (py * transform.scale + transform.offsetY).toFloat(),
               )
+
           drawCircle(
               brush =
                   Brush.radialGradient(

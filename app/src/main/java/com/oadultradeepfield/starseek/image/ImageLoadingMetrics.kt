@@ -4,12 +4,12 @@ import coil3.EventListener
 import coil3.request.ErrorResult
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
+import javax.inject.Singleton
 
 data class LoadMetrics(
     val totalLoads: Int = 0,
@@ -39,8 +39,10 @@ class ImageLoadingMetrics @Inject constructor() : EventListener() {
   override fun onSuccess(request: ImageRequest, result: SuccessResult) {
     val startTime = requestStartTimes.remove(request) ?: return
     val loadTime = System.currentTimeMillis() - startTime
+
     val isFromCache =
         result.dataSource.name.contains("MEMORY") || result.dataSource.name.contains("DISK")
+
     _metrics.update { current ->
       current.copy(
           totalLoads = current.totalLoads + 1,

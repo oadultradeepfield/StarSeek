@@ -44,6 +44,7 @@ fun HistoryScreen(viewModel: HistoryViewModel, onSolveClick: (Long) -> Unit) {
             onDeleteClick = viewModel::onDeleteClick,
         )
   }
+
   if (deleteConfirmId != null) {
     DeleteConfirmDialog(
         onConfirm = viewModel::onDeleteConfirm,
@@ -65,8 +66,10 @@ internal fun HistoryList(
           "$count solved image${if (count == 1) "" else "s"}",
           style = MaterialTheme.typography.headlineSmall,
       )
+
       Spacer(modifier = Modifier.height(Dimens.spacingLarge))
     }
+
     items(solves, key = { it.id }) { solve ->
       HistoryItem(
           solve = solve,

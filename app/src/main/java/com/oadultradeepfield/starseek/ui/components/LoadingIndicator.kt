@@ -12,16 +12,12 @@ import com.oadultradeepfield.starseek.ui.theme.StarSeekTheme
 
 @Composable
 fun LoadingIndicator(modifier: Modifier = Modifier) {
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        CircularProgressIndicator()
-    }
+  Box(modifier = modifier, contentAlignment = Alignment.Center) { CircularProgressIndicator() }
 }
 
 @Preview(showBackground = true)
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun LoadingIndicatorPreview() {
-    StarSeekTheme(dynamicColor = false) {
-        LoadingIndicator(Modifier.fillMaxSize())
-    }
+  StarSeekTheme(dynamicColor = false) { LoadingIndicator(Modifier.fillMaxSize()) }
 }

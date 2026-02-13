@@ -83,7 +83,9 @@ private fun HistoryItemContent(
         verticalAlignment = Alignment.CenterVertically,
     ) {
       image()
+
       Spacer(modifier = Modifier.width(Dimens.cardPadding))
+
       Column(modifier = Modifier.weight(1f)) {
         Text(summary, style = MaterialTheme.typography.titleMedium)
         Text(
@@ -97,6 +99,7 @@ private fun HistoryItemContent(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
       }
+
       IconButton(onClick = onDeleteClick) {
         Icon(Icons.Default.Delete, contentDescription = "Delete $summary")
       }

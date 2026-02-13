@@ -41,6 +41,7 @@ internal fun ObjectAccordionItem(
       } else {
         Modifier.padding(Dimens.listItemPadding)
       }
+
   Card(
       modifier =
           modifier
@@ -54,12 +55,14 @@ internal fun ObjectAccordionItem(
     Column {
       Box(modifier = Modifier.fillMaxWidth().then(headerPadding)) {
         Text(obj.name, style = MaterialTheme.typography.bodyLarge)
+
         Icon(
             imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
             contentDescription = if (isExpanded) "Collapse" else "Expand",
             modifier = Modifier.align(Alignment.CenterEnd),
         )
       }
+
       AnimatedVisibility(
           visible = isExpanded,
           enter = expandVertically(),
@@ -93,9 +96,13 @@ private fun AccordionDetailContent(state: ObjectDetailState) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+
         Spacer(modifier = Modifier.height(Dimens.spacingMedium))
+
         Text("Fun Fact", style = MaterialTheme.typography.titleSmall)
+
         Spacer(modifier = Modifier.height(Dimens.spacingXSmall))
+
         Text(state.detail.funFact, style = MaterialTheme.typography.bodySmall)
       }
     }

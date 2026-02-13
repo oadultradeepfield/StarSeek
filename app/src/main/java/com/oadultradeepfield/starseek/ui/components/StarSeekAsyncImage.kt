@@ -1,5 +1,6 @@
 package com.oadultradeepfield.starseek.ui.components
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -8,11 +9,11 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.request.bitmapConfig
+import coil3.request.transformations
 import coil3.size.Size
 import com.oadultradeepfield.starseek.image.StarFieldTransformation
 
@@ -21,11 +22,12 @@ enum class ImagePreset(
     val bitmapConfig: Bitmap.Config,
     val allowEnhancement: Boolean,
 ) {
-    THUMBNAIL_SMALL(64, Bitmap.Config.RGB_565, false),
-    THUMBNAIL_LARGE(300, Bitmap.Config.RGB_565, false),
-    FULL(null, Bitmap.Config.ARGB_8888, true),
+  THUMBNAIL_SMALL(64, Bitmap.Config.RGB_565, false),
+  THUMBNAIL_LARGE(300, Bitmap.Config.RGB_565, false),
+  FULL(null, Bitmap.Config.ARGB_8888, true),
 }
 
+@SuppressLint("LocalContextResourcesRead")
 @Composable
 fun StarSeekAsyncImage(
     model: Any?,
@@ -39,30 +41,33 @@ fun StarSeekAsyncImage(
     filterQuality: FilterQuality = FilterQuality.Low,
     onState: ((AsyncImagePainter.State) -> Unit)? = null,
 ) {
-    val context = LocalContext.current
-    val request = ImageRequest.Builder(context)
-        .data(model)
-        .bitmapConfig(preset.bitmapConfig)
-        .apply {
+  val context = LocalContext.current
+
+  val request =
+      ImageRequest.Builder(context)
+          .data(model)
+          .bitmapConfig(preset.bitmapConfig)
+          .apply {
             if (preset.sizeDp != null) {
-                val sizePx = (preset.sizeDp * context.resources.displayMetrics.density).toInt()
-                size(Size(sizePx, sizePx))
+              val sizePx = (preset.sizeDp * context.resources.displayMetrics.density).toInt()
+              size(Size(sizePx, sizePx))
             } else {
-                size(Size.ORIGINAL)
+              size(Size.ORIGINAL)
             }
             if (enhance && preset.allowEnhancement) {
-                transformations(StarFieldTransformation())
+              transformations(StarFieldTransformation())
             }
-        }
-        .build()
-    AsyncImage(
-        model = request,
-        contentDescription = contentDescription,
-        modifier = modifier,
-        contentScale = contentScale,
-        alignment = alignment,
-        colorFilter = colorFilter,
-        filterQuality = filterQuality,
-        onState = onState,
-    )
+          }
+          .build()
+
+  AsyncImage(
+      model = request,
+      contentDescription = contentDescription,
+      modifier = modifier,
+      contentScale = contentScale,
+      alignment = alignment,
+      colorFilter = colorFilter,
+      filterQuality = filterQuality,
+      onState = onState,
+  )
 }

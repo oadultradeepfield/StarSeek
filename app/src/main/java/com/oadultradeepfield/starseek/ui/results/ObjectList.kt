@@ -37,29 +37,37 @@ internal fun ObjectList(
 ) {
   val coroutineScope = rememberCoroutineScope()
   val horizontalPadding = Modifier.padding(horizontal = Dimens.screenPadding)
+
   var itemIndex = 0
   val objectIndexMap = mutableMapOf<String, Int>()
+
   itemIndex++
+
   grouped.byConstellation.entries.forEachIndexed { constellationIndex, (_, typeMap) ->
     if (constellationIndex > 0) itemIndex++
     itemIndex++
+
     typeMap.entries.forEachIndexed { typeIndex, (_, objects) ->
       if (typeIndex > 0) itemIndex++
       itemIndex++
+
       objects.forEach { obj ->
         objectIndexMap[obj.name] = itemIndex
         itemIndex++
       }
     }
   }
+
   LaunchedEffect(highlightedName) {
     if (highlightedName != null) {
       val index = objectIndexMap[highlightedName]
+
       if (index != null) {
         coroutineScope.launch { listState.animateScrollToItem(index) }
       }
     }
   }
+
   LazyColumn(
       modifier = modifier.fillMaxWidth(),
       state = listState,
@@ -74,10 +82,12 @@ internal fun ObjectList(
       )
       Spacer(modifier = Modifier.height(Dimens.spacingLarge))
     }
+
     grouped.byConstellation.entries.forEachIndexed { index, (constellation, typeMap) ->
       if (index > 0) {
         item { Spacer(modifier = Modifier.height(Dimens.spacingLarge)) }
       }
+
       item {
         Text(
             constellation,
@@ -85,10 +95,12 @@ internal fun ObjectList(
             modifier = horizontalPadding.padding(vertical = Dimens.spacingSmall),
         )
       }
+
       typeMap.entries.forEachIndexed { typeIndex, (type, objects) ->
         if (typeIndex > 0) {
           item { Spacer(modifier = Modifier.height(Dimens.spacingMedium)) }
         }
+
         item {
           Text(
               type.displayName,
@@ -97,6 +109,7 @@ internal fun ObjectList(
               modifier = horizontalPadding.padding(vertical = Dimens.spacingXSmall),
           )
         }
+
         items(objects, key = { it.name }) { obj ->
           val isExpanded = obj.name == highlightedName
           ObjectAccordionItem(
@@ -124,6 +137,7 @@ private fun ResultsContentPreview() {
             CelestialObject("Orion Nebula", ObjectType.NEBULA, "Orion"),
             CelestialObject("Polaris", ObjectType.STAR, "Ursa Minor"),
         )
+
     val grouped =
         GroupedObjects(
             mapOf(
@@ -141,6 +155,7 @@ private fun ResultsContentPreview() {
                     ),
             )
         )
+
     ResultsContent(
         solve =
             Solve(

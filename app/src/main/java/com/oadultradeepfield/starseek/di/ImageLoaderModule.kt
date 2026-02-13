@@ -18,29 +18,27 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object ImageLoaderModule {
-    private const val MEMORY_CACHE_PERCENT = 0.25
-    private const val DISK_CACHE_SIZE = 50L * 1024 * 1024
+  private const val MEMORY_CACHE_PERCENT = 0.25
+  private const val DISK_CACHE_SIZE = 50L * 1024 * 1024
 
-    @Provides
-    @Singleton
-    fun provideImageLoader(
-        @ApplicationContext context: Context,
-        okHttpClient: OkHttpClient,
-        metrics: ImageLoadingMetrics,
-    ): ImageLoader =
-        ImageLoader.Builder(context)
-            .memoryCache {
-                MemoryCache.Builder()
-                    .maxSizePercent(context, MEMORY_CACHE_PERCENT)
-                    .build()
-            }
-            .diskCache {
-                DiskCache.Builder()
-                    .directory(context.cacheDir.resolve("image_cache"))
-                    .maxSizeBytes(DISK_CACHE_SIZE)
-                    .build()
-            }
-            .components { add(OkHttpNetworkFetcherFactory(callFactory = { okHttpClient })) }
-            .eventListener(metrics)
-            .build()
+  @Provides
+  @Singleton
+  fun provideImageLoader(
+      @ApplicationContext context: Context,
+      okHttpClient: OkHttpClient,
+      metrics: ImageLoadingMetrics,
+  ): ImageLoader =
+      ImageLoader.Builder(context)
+          .memoryCache {
+            MemoryCache.Builder().maxSizePercent(context, MEMORY_CACHE_PERCENT).build()
+          }
+          .diskCache {
+            DiskCache.Builder()
+                .directory(context.cacheDir.resolve("image_cache"))
+                .maxSizeBytes(DISK_CACHE_SIZE)
+                .build()
+          }
+          .components { add(OkHttpNetworkFetcherFactory(callFactory = { okHttpClient })) }
+          .eventListener(metrics)
+          .build()
 }

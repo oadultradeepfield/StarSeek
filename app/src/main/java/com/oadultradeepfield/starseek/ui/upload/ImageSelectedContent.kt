@@ -129,7 +129,9 @@ internal fun MultiImageLoadingState(items: List<ImageProcessingItem>) {
   var currentIndex by rememberSaveable { mutableIntStateOf(0) }
   val safeIndex = currentIndex.coerceIn(0, (items.size - 1).coerceAtLeast(0))
   if (safeIndex != currentIndex) currentIndex = safeIndex
+
   val currentItem = items.getOrNull(safeIndex) ?: return
+
   Column(
       modifier = Modifier.fillMaxSize().padding(Dimens.screenPadding),
       horizontalAlignment = Alignment.CenterHorizontally,
@@ -218,6 +220,7 @@ private fun ImageStatusIndicator(status: ImageStatus) {
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(Dimens.loadingIndicatorSizeSmall),
         )
+
         Spacer(modifier = Modifier.width(Dimens.spacingSmall))
         Text("Done", style = MaterialTheme.typography.bodyMedium)
       }
@@ -228,7 +231,9 @@ private fun ImageStatusIndicator(status: ImageStatus) {
             tint = MaterialTheme.colorScheme.error,
             modifier = Modifier.size(Dimens.loadingIndicatorSizeSmall),
         )
+
         Spacer(modifier = Modifier.width(Dimens.spacingSmall))
+
         Text(
             status.error,
             style = MaterialTheme.typography.bodyMedium,

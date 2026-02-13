@@ -28,92 +28,107 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.oadultradeepfield.starseek.ui.components.ImagePreset
 import com.oadultradeepfield.starseek.ui.components.StarSeekAsyncImage
 import com.oadultradeepfield.starseek.ui.theme.Dimens
 
 @Composable
 fun ImageDebugScreen(viewModel: ImageDebugViewModel = hiltViewModel()) {
-    val metrics by viewModel.metrics.collectAsState()
-    var selectedUri by rememberSaveable { mutableStateOf<Uri?>(null) }
-    var enhanceEnabled by rememberSaveable { mutableStateOf(false) }
-    val imagePicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri -> uri?.let { selectedUri = it } }
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(Dimens.screenPadding)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
+  val metrics by viewModel.metrics.collectAsState()
+  var selectedUri by rememberSaveable { mutableStateOf<Uri?>(null) }
+  var enhanceEnabled by rememberSaveable { mutableStateOf(false) }
+
+  val imagePicker =
+      rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
+        uri?.let { selectedUri = it }
+      }
+
+  Column(
+      modifier =
+          Modifier.fillMaxSize()
+              .padding(Dimens.screenPadding)
+              .verticalScroll(rememberScrollState()),
+      horizontalAlignment = Alignment.CenterHorizontally,
+  ) {
+    Text("Image Debug", style = MaterialTheme.typography.headlineMedium)
+
+    Spacer(modifier = Modifier.height(Dimens.spacingLarge))
+
+    Button(onClick = { imagePicker.launch("image/*") }) { Text("Select Image") }
+
+    Spacer(modifier = Modifier.height(Dimens.spacingLarge))
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text("Image Debug", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(Dimens.spacingLarge))
-        Button(onClick = { imagePicker.launch("image/*") }) {
-            Text("Select Image")
-        }
-        Spacer(modifier = Modifier.height(Dimens.spacingLarge))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text("Enhancement", style = MaterialTheme.typography.bodyLarge)
-            Switch(checked = enhanceEnabled, onCheckedChange = { enhanceEnabled = it })
-        }
-        Spacer(modifier = Modifier.height(Dimens.spacingLarge))
-        selectedUri?.let { uri ->
-            Text("Original", style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(Dimens.spacingSmall))
-            StarSeekAsyncImage(
-                model = uri,
-                contentDescription = "Original image",
-                modifier = Modifier.size(200.dp),
-                preset = ImagePreset.FULL,
-                enhance = false,
-            )
-            Spacer(modifier = Modifier.height(Dimens.spacingLarge))
-            Text(
-                if (enhanceEnabled) "Enhanced (Asinh)" else "No Enhancement",
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Spacer(modifier = Modifier.height(Dimens.spacingSmall))
-            StarSeekAsyncImage(
-                model = uri,
-                contentDescription = "Processed image",
-                modifier = Modifier.size(200.dp),
-                preset = ImagePreset.FULL,
-                enhance = enhanceEnabled,
-            )
-        }
-        Spacer(modifier = Modifier.height(Dimens.spacingXLarge))
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(Dimens.cardPadding)) {
-                Text("Metrics", style = MaterialTheme.typography.titleMedium)
-                Spacer(modifier = Modifier.height(Dimens.spacingSmall))
-                MetricRow("Total Loads", metrics.totalLoads.toString())
-                MetricRow("Cache Hits", metrics.cacheHits.toString())
-                MetricRow("Cache Misses", metrics.cacheMisses.toString())
-                MetricRow("Cache Hit Rate", "%.1f%%".format(metrics.cacheHitRate * 100))
-                MetricRow("Avg Load Time", "${metrics.averageLoadTimeMs}ms")
-                MetricRow("Last Load Time", "${metrics.lastLoadTimeMs}ms")
-            }
-        }
-        Spacer(modifier = Modifier.height(Dimens.spacingLarge))
-        Button(onClick = { viewModel.resetMetrics() }) {
-            Text("Reset Metrics")
-        }
+      Text("Enhancement", style = MaterialTheme.typography.bodyLarge)
+      Switch(checked = enhanceEnabled, onCheckedChange = { enhanceEnabled = it })
     }
+
+    Spacer(modifier = Modifier.height(Dimens.spacingLarge))
+
+    selectedUri?.let { uri ->
+      Text("Original", style = MaterialTheme.typography.titleMedium)
+
+      Spacer(modifier = Modifier.height(Dimens.spacingSmall))
+
+      StarSeekAsyncImage(
+          model = uri,
+          contentDescription = "Original image",
+          modifier = Modifier.size(200.dp),
+          preset = ImagePreset.FULL,
+          enhance = false,
+      )
+
+      Spacer(modifier = Modifier.height(Dimens.spacingLarge))
+
+      Text(
+          if (enhanceEnabled) "Enhanced (Asinh)" else "No Enhancement",
+          style = MaterialTheme.typography.titleMedium,
+      )
+
+      Spacer(modifier = Modifier.height(Dimens.spacingSmall))
+
+      StarSeekAsyncImage(
+          model = uri,
+          contentDescription = "Processed image",
+          modifier = Modifier.size(200.dp),
+          preset = ImagePreset.FULL,
+          enhance = enhanceEnabled,
+      )
+    }
+
+    Spacer(modifier = Modifier.height(Dimens.spacingXLarge))
+
+    Card(modifier = Modifier.fillMaxWidth()) {
+      Column(modifier = Modifier.padding(Dimens.cardPadding)) {
+        Text("Metrics", style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.height(Dimens.spacingSmall))
+        MetricRow("Total Loads", metrics.totalLoads.toString())
+        MetricRow("Cache Hits", metrics.cacheHits.toString())
+        MetricRow("Cache Misses", metrics.cacheMisses.toString())
+        MetricRow("Cache Hit Rate", "%.1f%%".format(metrics.cacheHitRate * 100))
+        MetricRow("Avg Load Time", "${metrics.averageLoadTimeMs}ms")
+        MetricRow("Last Load Time", "${metrics.lastLoadTimeMs}ms")
+      }
+    }
+
+    Spacer(modifier = Modifier.height(Dimens.spacingLarge))
+
+    Button(onClick = { viewModel.resetMetrics() }) { Text("Reset Metrics") }
+  }
 }
 
 @Composable
 private fun MetricRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = Dimens.spacingXSmall),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(label, style = MaterialTheme.typography.bodyMedium)
-        Text(value, style = MaterialTheme.typography.bodyMedium)
-    }
+  Row(
+      modifier = Modifier.fillMaxWidth().padding(vertical = Dimens.spacingXSmall),
+      horizontalArrangement = Arrangement.SpaceBetween,
+  ) {
+    Text(label, style = MaterialTheme.typography.bodyMedium)
+    Text(value, style = MaterialTheme.typography.bodyMedium)
+  }
 }
