@@ -98,7 +98,6 @@ fun ImageDebugScreen(viewModel: ImageDebugViewModel = hiltViewModel()) {
                 MetricRow("Cache Hit Rate", "%.1f%%".format(metrics.cacheHitRate * 100))
                 MetricRow("Avg Load Time", "${metrics.averageLoadTimeMs}ms")
                 MetricRow("Last Load Time", "${metrics.lastLoadTimeMs}ms")
-                MetricRow("Last Transform Time", "${metrics.lastTransformTimeMs}ms")
             }
         }
         Spacer(modifier = Modifier.height(Dimens.spacingLarge))
