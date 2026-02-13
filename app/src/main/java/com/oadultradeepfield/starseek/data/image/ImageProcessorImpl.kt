@@ -6,14 +6,14 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import com.oadultradeepfield.starseek.domain.repository.ImageProcessor
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.security.MessageDigest
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Singleton
 class ImageProcessorImpl

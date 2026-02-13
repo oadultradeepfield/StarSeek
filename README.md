@@ -11,6 +11,7 @@
     <img src="https://img.shields.io/github/stars/oadultradeepfield/StarSeek" alt="stars" />
     <img src="https://img.shields.io/github/issues/oadultradeepfield/StarSeek" alt="open issues" />
     <img src="https://img.shields.io/github/license/oadultradeepfield/StarSeek" alt="license" />
+
   </p>
 
   <h4>
