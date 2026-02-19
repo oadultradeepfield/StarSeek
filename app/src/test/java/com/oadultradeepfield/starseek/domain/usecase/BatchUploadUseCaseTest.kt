@@ -21,11 +21,12 @@ import org.junit.Test
 class BatchUploadUseCaseTest {
   private lateinit var processAndUploadImage: ProcessAndUploadImageUseCase
   private lateinit var useCase: BatchUploadUseCase
+  private val testDispatcher = UnconfinedTestDispatcher()
 
   @Before
   fun setup() {
     processAndUploadImage = mockk()
-    useCase = BatchUploadUseCase(processAndUploadImage)
+    useCase = BatchUploadUseCase(processAndUploadImage, testDispatcher)
   }
 
   private fun createUri(path: String = "file:///test/image.jpg"): Uri {
@@ -36,11 +37,10 @@ class BatchUploadUseCaseTest {
 
   @Test
   fun `emits initial pending state for all uris`() =
-      runTest(UnconfinedTestDispatcher()) {
+      runTest(testDispatcher) {
         val uri1 = createUri("file:///test/image1.jpg")
         val uri2 = createUri("file:///test/image2.jpg")
         coEvery { processAndUploadImage(any(), any()) } returns UploadResult.Success(1L)
-
         val states = useCase(listOf(uri1, uri2)).toList()
         val first = states.first() as BatchUploadState.InProgress
         assertEquals(2, first.items.size)
@@ -49,12 +49,11 @@ class BatchUploadUseCaseTest {
 
   @Test
   fun `emits success result when all uploads succeed`() =
-      runTest(UnconfinedTestDispatcher()) {
+      runTest(testDispatcher) {
         val uri1 = createUri("file:///test/image1.jpg")
         val uri2 = createUri("file:///test/image2.jpg")
         coEvery { processAndUploadImage(uri1, any()) } returns UploadResult.Success(1L)
         coEvery { processAndUploadImage(uri2, any()) } returns UploadResult.CacheHit(2L)
-
         val states = useCase(listOf(uri1, uri2)).toList()
         val lastState = states.last() as BatchUploadState.Completed
         val result = lastState.result as BatchUploadResult.Success
@@ -64,12 +63,11 @@ class BatchUploadUseCaseTest {
 
   @Test
   fun `emits AllFailed when all uploads fail`() =
-      runTest(UnconfinedTestDispatcher()) {
+      runTest(testDispatcher) {
         val uri1 = createUri("file:///test/image1.jpg")
         val uri2 = createUri("file:///test/image2.jpg")
         coEvery { processAndUploadImage(uri1, any()) } returns UploadResult.Failure("Error 1")
         coEvery { processAndUploadImage(uri2, any()) } returns UploadResult.Failure("Error 2")
-
         val states = useCase(listOf(uri1, uri2)).toList()
         val lastState = states.last() as BatchUploadState.Completed
         val result = lastState.result as BatchUploadResult.AllFailed
@@ -78,12 +76,11 @@ class BatchUploadUseCaseTest {
 
   @Test
   fun `emits Success with partial results when some uploads fail`() =
-      runTest(UnconfinedTestDispatcher()) {
+      runTest(testDispatcher) {
         val uri1 = createUri("file:///test/image1.jpg")
         val uri2 = createUri("file:///test/image2.jpg")
         coEvery { processAndUploadImage(uri1, any()) } returns UploadResult.Success(1L)
         coEvery { processAndUploadImage(uri2, any()) } returns UploadResult.Failure("Failed")
-
         val states = useCase(listOf(uri1, uri2)).toList()
         val lastState = states.last() as BatchUploadState.Completed
         val result = lastState.result as BatchUploadResult.Success
@@ -92,10 +89,9 @@ class BatchUploadUseCaseTest {
 
   @Test
   fun `emits in-progress states during upload`() =
-      runTest(UnconfinedTestDispatcher()) {
+      runTest(testDispatcher) {
         val uri = createUri()
         coEvery { processAndUploadImage(uri, any()) } returns UploadResult.Success(1L)
-
         val states = useCase(listOf(uri)).toList()
         val inProgressStates = states.filterIsInstance<BatchUploadState.InProgress>()
         assertTrue("Should have at least one InProgress state", inProgressStates.isNotEmpty())
@@ -104,10 +100,9 @@ class BatchUploadUseCaseTest {
 
   @Test
   fun `handles single uri upload`() =
-      runTest(UnconfinedTestDispatcher()) {
+      runTest(testDispatcher) {
         val uri = createUri()
         coEvery { processAndUploadImage(uri, any()) } returns UploadResult.Success(42L)
-
         val states = useCase(listOf(uri)).toList()
         val lastState = states.last() as BatchUploadState.Completed
         val result = lastState.result as BatchUploadResult.Success
