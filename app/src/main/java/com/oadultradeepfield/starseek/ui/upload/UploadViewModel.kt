@@ -3,9 +3,9 @@ package com.oadultradeepfield.starseek.ui.upload
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.oadultradeepfield.starseek.domain.model.UploadProgress
+import com.oadultradeepfield.starseek.domain.model.UploadResult
 import com.oadultradeepfield.starseek.domain.usecase.ProcessAndUploadImageUseCase
-import com.oadultradeepfield.starseek.domain.usecase.model.UploadProgress
-import com.oadultradeepfield.starseek.domain.usecase.model.UploadResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

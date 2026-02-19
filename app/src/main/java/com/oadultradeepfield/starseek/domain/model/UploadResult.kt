@@ -1,4 +1,4 @@
-package com.oadultradeepfield.starseek.domain.usecase.model
+package com.oadultradeepfield.starseek.domain.model
 
 sealed class UploadResult {
   data class CacheHit(val solveId: Long) : UploadResult()

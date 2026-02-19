@@ -2,9 +2,9 @@ package com.oadultradeepfield.starseek.ui.upload
 
 import android.net.Uri
 import app.cash.turbine.test
+import com.oadultradeepfield.starseek.domain.model.UploadProgress
+import com.oadultradeepfield.starseek.domain.model.UploadResult
 import com.oadultradeepfield.starseek.domain.usecase.ProcessAndUploadImageUseCase
-import com.oadultradeepfield.starseek.domain.usecase.model.UploadProgress
-import com.oadultradeepfield.starseek.domain.usecase.model.UploadResult
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
