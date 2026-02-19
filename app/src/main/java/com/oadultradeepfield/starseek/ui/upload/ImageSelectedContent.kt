@@ -194,6 +194,12 @@ internal fun MultiImageLoadingState(items: List<ImageProcessingItem>) {
   }
 }
 
+private fun stepToMessage(step: UploadStep): String = when (step) {
+  UploadStep.Uploading -> "Uploading..."
+  UploadStep.Analyzing -> "Analyzing stars..."
+  UploadStep.Saving -> "Saving..."
+}
+
 @Composable
 private fun ImageStatusIndicator(status: ImageStatus) {
   Row(
@@ -211,7 +217,7 @@ private fun ImageStatusIndicator(status: ImageStatus) {
       is ImageStatus.Processing -> {
         LoadingIndicator(Modifier.size(Dimens.loadingIndicatorSizeSmall))
         Spacer(modifier = Modifier.width(Dimens.spacingSmall))
-        Text(status.message, style = MaterialTheme.typography.bodyMedium)
+        Text(stepToMessage(status.step), style = MaterialTheme.typography.bodyMedium)
       }
       is ImageStatus.Completed -> {
         Icon(
