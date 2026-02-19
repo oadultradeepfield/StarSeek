@@ -4,14 +4,11 @@ import android.net.Uri
 import app.cash.turbine.test
 import com.oadultradeepfield.starseek.domain.model.BatchUploadProgress
 import com.oadultradeepfield.starseek.domain.model.ImageUploadStatus
-import com.oadultradeepfield.starseek.domain.model.PollResult
-import com.oadultradeepfield.starseek.domain.model.UploadImageResult
 import com.oadultradeepfield.starseek.domain.model.UploadStep
-import com.oadultradeepfield.starseek.testutil.TestData
-import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -22,17 +19,13 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class BatchUploadUseCaseTest {
   private val testDispatcher = UnconfinedTestDispatcher()
-  private lateinit var uploadImage: UploadImageUseCase
-  private lateinit var pollJobStatus: PollJobStatusUseCase
-  private lateinit var saveSolve: SaveSolveUseCase
+  private lateinit var processSingleUpload: ProcessSingleUploadUseCase
   private lateinit var useCase: BatchUploadUseCase
 
   @Before
   fun setup() {
-    uploadImage = mockk()
-    pollJobStatus = mockk()
-    saveSolve = mockk()
-    useCase = BatchUploadUseCase(uploadImage, pollJobStatus, saveSolve, testDispatcher)
+    processSingleUpload = mockk()
+    useCase = BatchUploadUseCase(processSingleUpload, testDispatcher)
   }
 
   private fun createUri(path: String = "file:///test/image.jpg"): Uri {
@@ -44,7 +37,7 @@ class BatchUploadUseCaseTest {
   @Test
   fun `emits initial pending state`() = runTest {
     val uri = createUri()
-    coEvery { uploadImage(uri) } returns UploadImageResult.CacheHit(42L)
+    every { processSingleUpload(uri) } returns flowOf(ImageUploadStatus.Completed(42L))
 
     useCase(listOf(uri)).test {
       val initial = awaitItem()
@@ -55,9 +48,13 @@ class BatchUploadUseCaseTest {
   }
 
   @Test
-  fun `cache hit completes immediately`() = runTest {
+  fun `single upload completes`() = runTest {
     val uri = createUri()
-    coEvery { uploadImage(uri) } returns UploadImageResult.CacheHit(42L)
+    every { processSingleUpload(uri) } returns
+        flowOf(
+            ImageUploadStatus.InProgress(UploadStep.Uploading),
+            ImageUploadStatus.Completed(42L),
+        )
 
     useCase(listOf(uri)).test {
       var lastStatus: ImageUploadStatus?
@@ -74,7 +71,11 @@ class BatchUploadUseCaseTest {
   @Test
   fun `upload failure emits failed status`() = runTest {
     val uri = createUri()
-    coEvery { uploadImage(uri) } returns UploadImageResult.Failure("Network error")
+    every { processSingleUpload(uri) } returns
+        flowOf(
+            ImageUploadStatus.InProgress(UploadStep.Uploading),
+            ImageUploadStatus.Failed("Network error"),
+        )
 
     useCase(listOf(uri)).test {
       var lastStatus: ImageUploadStatus?
@@ -91,12 +92,13 @@ class BatchUploadUseCaseTest {
   @Test
   fun `full upload flow emits all steps`() = runTest {
     val uri = createUri()
-    val internalUri = createUri("file:///internal/image.jpg")
-    val solve = TestData.createSolve(id = 0)
-    coEvery { uploadImage(uri) } returns
-        UploadImageResult.Uploaded("job-123", internalUri, "hash123")
-    coEvery { pollJobStatus("job-123") } returns PollResult.Success(solve)
-    coEvery { saveSolve(any()) } returns 99L
+    every { processSingleUpload(uri) } returns
+        flowOf(
+            ImageUploadStatus.InProgress(UploadStep.Uploading),
+            ImageUploadStatus.InProgress(UploadStep.Analyzing),
+            ImageUploadStatus.InProgress(UploadStep.Saving),
+            ImageUploadStatus.Completed(99L),
+        )
 
     val steps = mutableListOf<ImageUploadStatus>()
     useCase(listOf(uri)).test {
@@ -116,31 +118,19 @@ class BatchUploadUseCaseTest {
   }
 
   @Test
-  fun `poll failure emits failed status`() = runTest {
-    val uri = createUri()
-    val internalUri = createUri("file:///internal/image.jpg")
-    coEvery { uploadImage(uri) } returns
-        UploadImageResult.Uploaded("job-123", internalUri, "hash123")
-    coEvery { pollJobStatus("job-123") } returns PollResult.Failure("Analysis failed")
-
-    useCase(listOf(uri)).test {
-      var lastStatus: ImageUploadStatus?
-      while (true) {
-        val item = awaitItem()
-        lastStatus = item.items[0].status
-        if (lastStatus is ImageUploadStatus.Failed) break
-      }
-      assertEquals("Analysis failed", lastStatus.error)
-      awaitComplete()
-    }
-  }
-
-  @Test
   fun `multiple images upload in parallel`() = runTest {
     val uri1 = createUri("file:///test/image1.jpg")
     val uri2 = createUri("file:///test/image2.jpg")
-    coEvery { uploadImage(uri1) } returns UploadImageResult.CacheHit(1L)
-    coEvery { uploadImage(uri2) } returns UploadImageResult.CacheHit(2L)
+    every { processSingleUpload(uri1) } returns
+        flowOf(
+            ImageUploadStatus.InProgress(UploadStep.Uploading),
+            ImageUploadStatus.Completed(1L),
+        )
+    every { processSingleUpload(uri2) } returns
+        flowOf(
+            ImageUploadStatus.InProgress(UploadStep.Uploading),
+            ImageUploadStatus.Completed(2L),
+        )
 
     useCase(listOf(uri1, uri2)).test {
       var lastItem: BatchUploadProgress?
@@ -162,8 +152,16 @@ class BatchUploadUseCaseTest {
   fun `partial failure with multiple images`() = runTest {
     val uri1 = createUri("file:///test/image1.jpg")
     val uri2 = createUri("file:///test/image2.jpg")
-    coEvery { uploadImage(uri1) } returns UploadImageResult.CacheHit(1L)
-    coEvery { uploadImage(uri2) } returns UploadImageResult.Failure("Failed")
+    every { processSingleUpload(uri1) } returns
+        flowOf(
+            ImageUploadStatus.InProgress(UploadStep.Uploading),
+            ImageUploadStatus.Completed(1L),
+        )
+    every { processSingleUpload(uri2) } returns
+        flowOf(
+            ImageUploadStatus.InProgress(UploadStep.Uploading),
+            ImageUploadStatus.Failed("Failed"),
+        )
 
     useCase(listOf(uri1, uri2)).test {
       var lastItem: BatchUploadProgress?
