@@ -5,14 +5,13 @@ import com.oadultradeepfield.starseek.domain.model.BatchUploadResult
 import com.oadultradeepfield.starseek.domain.model.BatchUploadState
 import com.oadultradeepfield.starseek.domain.model.ImageUploadStatus
 import com.oadultradeepfield.starseek.domain.model.UploadResult
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.sync.withPermit
 import javax.inject.Inject
 
 class BatchUploadUseCase
@@ -20,50 +19,46 @@ class BatchUploadUseCase
 constructor(
     private val processAndUploadImage: ProcessAndUploadImageUseCase,
 ) {
+  private val uploadDispatcher = Dispatchers.IO.limitedParallelism(MAX_CONCURRENT_UPLOADS)
+
   operator fun invoke(uris: List<Uri>): Flow<BatchUploadState> = channelFlow {
     val statuses =
         uris.associateWith<Uri, ImageUploadStatus> { ImageUploadStatus.Pending(it) }.toMutableMap()
     val mutex = Mutex()
-    val semaphore = Semaphore(MAX_CONCURRENT_UPLOADS)
-
     send(BatchUploadState.InProgress(statuses.values.toList()))
-
     val jobs =
         uris.map { uri ->
-          launch {
-            semaphore.withPermit {
-              val result =
-                  processAndUploadImage(uri) { progress ->
-                    launch {
-                      mutex.withLock {
-                        statuses[uri] = ImageUploadStatus.Processing(uri, progress)
-                        send(BatchUploadState.InProgress(statuses.values.toList()))
-                      }
+          launch(uploadDispatcher) {
+            val result =
+                processAndUploadImage(uri) { progress ->
+                  launch {
+                    mutex.withLock {
+                      statuses[uri] = ImageUploadStatus.Processing(uri, progress)
+                      send(BatchUploadState.InProgress(statuses.values.toList()))
                     }
                   }
-              mutex.withLock {
-                statuses[uri] =
-                    when (result) {
-                      is UploadResult.CacheHit -> ImageUploadStatus.Succeeded(uri, result.solveId)
-                      is UploadResult.Success -> ImageUploadStatus.Succeeded(uri, result.solveId)
-                      is UploadResult.Failure -> ImageUploadStatus.Failed(uri, result.error)
-                    }
-                send(BatchUploadState.InProgress(statuses.values.toList()))
-              }
+                }
+            mutex.withLock {
+              statuses[uri] =
+                  when (result) {
+                    is UploadResult.CacheHit -> ImageUploadStatus.Succeeded(uri, result.solveId)
+                    is UploadResult.Success -> ImageUploadStatus.Succeeded(uri, result.solveId)
+                    is UploadResult.Failure -> ImageUploadStatus.Failed(uri, result.error)
+                  }
+              send(BatchUploadState.InProgress(statuses.values.toList()))
             }
           }
         }
     jobs.joinAll()
-
     val successIds =
         statuses.values.filterIsInstance<ImageUploadStatus.Succeeded>().map { it.solveId }
     val failures = statuses.values.filterIsInstance<ImageUploadStatus.Failed>()
-
-    val finalResult = when {
-      successIds.isNotEmpty() -> BatchUploadResult.Success(successIds)
-      failures.isNotEmpty() -> BatchUploadResult.AllFailed(failures.first().error)
-      else -> BatchUploadResult.AllFailed("Unknown error")
-    }
+    val finalResult =
+        when {
+          successIds.isNotEmpty() -> BatchUploadResult.Success(successIds)
+          failures.isNotEmpty() -> BatchUploadResult.AllFailed(failures.first().error)
+          else -> BatchUploadResult.AllFailed("Unknown error")
+        }
     send(BatchUploadState.Completed(finalResult))
   }
 
