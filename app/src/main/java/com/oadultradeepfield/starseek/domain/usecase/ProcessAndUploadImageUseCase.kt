@@ -2,10 +2,10 @@ package com.oadultradeepfield.starseek.domain.usecase
 
 import android.net.Uri
 import com.oadultradeepfield.starseek.domain.model.JobStatus
-import com.oadultradeepfield.starseek.domain.repository.ImageProcessor
-import com.oadultradeepfield.starseek.domain.repository.SolveRepository
 import com.oadultradeepfield.starseek.domain.model.UploadProgress
 import com.oadultradeepfield.starseek.domain.model.UploadResult
+import com.oadultradeepfield.starseek.domain.repository.ImageProcessor
+import com.oadultradeepfield.starseek.domain.repository.SolveRepository
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
@@ -84,6 +84,7 @@ constructor(
           },
       )
     }
+
     return UploadResult.Failure("Cancelled")
   }
 
