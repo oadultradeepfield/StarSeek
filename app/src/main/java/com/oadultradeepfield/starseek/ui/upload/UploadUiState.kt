@@ -1,26 +1,9 @@
 package com.oadultradeepfield.starseek.ui.upload
 
 import android.net.Uri
+import com.oadultradeepfield.starseek.domain.model.ImageUploadStatus
 
-sealed class UploadStep {
-  data object Uploading : UploadStep()
-
-  data object Analyzing : UploadStep()
-
-  data object Saving : UploadStep()
-}
-
-sealed class ImageStatus {
-  data object Pending : ImageStatus()
-
-  data class Processing(val step: UploadStep) : ImageStatus()
-
-  data class Completed(val solveId: Long) : ImageStatus()
-
-  data class Failed(val error: String) : ImageStatus()
-}
-
-data class ImageProcessingItem(val uri: Uri, val status: ImageStatus)
+data class ImageProcessingItem(val uri: Uri, val status: ImageUploadStatus)
 
 sealed class UploadUiState {
   data object Empty : UploadUiState()

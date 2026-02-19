@@ -2,19 +2,16 @@ package com.oadultradeepfield.starseek.ui.upload
 
 import android.net.Uri
 import app.cash.turbine.test
-import com.oadultradeepfield.starseek.domain.model.PollResult
-import com.oadultradeepfield.starseek.domain.model.UploadImageResult
-import com.oadultradeepfield.starseek.domain.usecase.PollJobStatusUseCase
-import com.oadultradeepfield.starseek.domain.usecase.SaveSolveUseCase
-import com.oadultradeepfield.starseek.domain.usecase.UploadImageUseCase
-import com.oadultradeepfield.starseek.testutil.TestData
-import io.mockk.coEvery
+import com.oadultradeepfield.starseek.domain.model.BatchUploadProgress
+import com.oadultradeepfield.starseek.domain.model.ImageUploadState
+import com.oadultradeepfield.starseek.domain.model.ImageUploadStatus
+import com.oadultradeepfield.starseek.domain.usecase.BatchUploadUseCase
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -27,19 +24,14 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class UploadViewModelTest {
   private val testDispatcher = StandardTestDispatcher()
-  private val backgroundDispatcher = UnconfinedTestDispatcher()
-  private lateinit var uploadImage: UploadImageUseCase
-  private lateinit var pollJobStatus: PollJobStatusUseCase
-  private lateinit var saveSolve: SaveSolveUseCase
+  private lateinit var batchUpload: BatchUploadUseCase
   private lateinit var viewModel: UploadViewModel
 
   @Before
   fun setup() {
     Dispatchers.setMain(testDispatcher)
-    uploadImage = mockk()
-    pollJobStatus = mockk()
-    saveSolve = mockk()
-    viewModel = UploadViewModel(uploadImage, pollJobStatus, saveSolve, backgroundDispatcher)
+    batchUpload = mockk()
+    viewModel = UploadViewModel(batchUpload)
   }
 
   @After
@@ -76,9 +68,10 @@ class UploadViewModelTest {
   }
 
   @Test
-  fun `onUploadClick emits Success when upload completes with cache hit`() = runTest {
+  fun `onUploadClick emits Success when upload completes`() = runTest {
     val uri = createUri()
-    coEvery { uploadImage(uri) } returns UploadImageResult.CacheHit(42L)
+    every { batchUpload(listOf(uri)) } returns
+        flowOf(BatchUploadProgress(listOf(ImageUploadState(uri, ImageUploadStatus.Completed(42L)))))
 
     viewModel.onImagesSelected(listOf(uri))
     viewModel.onUploadClick()
@@ -89,27 +82,14 @@ class UploadViewModelTest {
   }
 
   @Test
-  fun `onUploadClick emits Success after full upload flow`() = runTest {
-    val uri = createUri()
-    val internalUri = createUri("file:///internal/image.jpg")
-    val solve = TestData.createSolve(id = 0)
-    coEvery { uploadImage(uri) } returns
-        UploadImageResult.Uploaded("job-123", internalUri, "hash123")
-    coEvery { pollJobStatus("job-123") } returns PollResult.Success(solve)
-    coEvery { saveSolve(any()) } returns 99L
-
-    viewModel.onImagesSelected(listOf(uri))
-    viewModel.onUploadClick()
-    testDispatcher.scheduler.advanceUntilIdle()
-
-    val state = viewModel.uiState.value as UploadUiState.Success
-    assertEquals(listOf(99L), state.solveIds)
-  }
-
-  @Test
   fun `upload failure emits Error with message and lastUris`() = runTest {
     val uri = createUri()
-    coEvery { uploadImage(uri) } returns UploadImageResult.Failure("Network error")
+    every { batchUpload(listOf(uri)) } returns
+        flowOf(
+            BatchUploadProgress(
+                listOf(ImageUploadState(uri, ImageUploadStatus.Failed("Network error")))
+            )
+        )
 
     viewModel.onImagesSelected(listOf(uri))
     viewModel.onUploadClick()
@@ -118,22 +98,6 @@ class UploadViewModelTest {
     val state = viewModel.uiState.value as UploadUiState.Error
     assertEquals("Network error", state.message)
     assertEquals(listOf(uri), state.lastUris)
-  }
-
-  @Test
-  fun `poll failure emits Error`() = runTest {
-    val uri = createUri()
-    val internalUri = createUri("file:///internal/image.jpg")
-    coEvery { uploadImage(uri) } returns
-        UploadImageResult.Uploaded("job-123", internalUri, "hash123")
-    coEvery { pollJobStatus("job-123") } returns PollResult.Failure("Analysis failed")
-
-    viewModel.onImagesSelected(listOf(uri))
-    viewModel.onUploadClick()
-    testDispatcher.scheduler.advanceUntilIdle()
-
-    val state = viewModel.uiState.value as UploadUiState.Error
-    assertEquals("Analysis failed", state.message)
   }
 
   @Test
@@ -147,11 +111,20 @@ class UploadViewModelTest {
   fun `retry restarts upload from lastUris when in Error state`() = runTest {
     val uri = createUri()
     var callCount = 0
-    coEvery { uploadImage(uri) } answers
+    every { batchUpload(listOf(uri)) } answers
         {
           callCount++
-          if (callCount == 1) UploadImageResult.Failure("Network error")
-          else UploadImageResult.CacheHit(42L)
+          if (callCount == 1) {
+            flowOf(
+                BatchUploadProgress(
+                    listOf(ImageUploadState(uri, ImageUploadStatus.Failed("Network error")))
+                )
+            )
+          } else {
+            flowOf(
+                BatchUploadProgress(listOf(ImageUploadState(uri, ImageUploadStatus.Completed(42L))))
+            )
+          }
         }
 
     viewModel.onImagesSelected(listOf(uri))
@@ -178,8 +151,15 @@ class UploadViewModelTest {
   fun `multiple images upload returns all solveIds`() = runTest {
     val uri1 = createUri("file:///test/image1.jpg")
     val uri2 = createUri("file:///test/image2.jpg")
-    coEvery { uploadImage(uri1) } returns UploadImageResult.CacheHit(1L)
-    coEvery { uploadImage(uri2) } returns UploadImageResult.CacheHit(2L)
+    every { batchUpload(listOf(uri1, uri2)) } returns
+        flowOf(
+            BatchUploadProgress(
+                listOf(
+                    ImageUploadState(uri1, ImageUploadStatus.Completed(1L)),
+                    ImageUploadState(uri2, ImageUploadStatus.Completed(2L)),
+                )
+            )
+        )
 
     viewModel.onImagesSelected(listOf(uri1, uri2))
     viewModel.onUploadClick()
@@ -195,8 +175,15 @@ class UploadViewModelTest {
   fun `partial success returns only successful solveIds`() = runTest {
     val uri1 = createUri("file:///test/image1.jpg")
     val uri2 = createUri("file:///test/image2.jpg")
-    coEvery { uploadImage(uri1) } returns UploadImageResult.CacheHit(1L)
-    coEvery { uploadImage(uri2) } returns UploadImageResult.Failure("Failed")
+    every { batchUpload(listOf(uri1, uri2)) } returns
+        flowOf(
+            BatchUploadProgress(
+                listOf(
+                    ImageUploadState(uri1, ImageUploadStatus.Completed(1L)),
+                    ImageUploadState(uri2, ImageUploadStatus.Failed("Failed")),
+                )
+            )
+        )
 
     viewModel.onImagesSelected(listOf(uri1, uri2))
     viewModel.onUploadClick()

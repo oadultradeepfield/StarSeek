@@ -40,6 +40,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.oadultradeepfield.starseek.domain.model.ImageUploadStatus
+import com.oadultradeepfield.starseek.domain.model.UploadStep
 import com.oadultradeepfield.starseek.ui.components.ImagePreset
 import com.oadultradeepfield.starseek.ui.components.LoadingIndicator
 import com.oadultradeepfield.starseek.ui.components.StarSeekAsyncImage
@@ -194,52 +196,50 @@ internal fun MultiImageLoadingState(items: List<ImageProcessingItem>) {
   }
 }
 
-private fun stepToMessage(step: UploadStep): String = when (step) {
-  UploadStep.Uploading -> "Uploading..."
-  UploadStep.Analyzing -> "Analyzing stars..."
-  UploadStep.Saving -> "Saving..."
-}
+private fun stepToMessage(step: UploadStep): String =
+    when (step) {
+      UploadStep.Uploading -> "Uploading..."
+      UploadStep.Analyzing -> "Analyzing stars..."
+      UploadStep.Saving -> "Saving..."
+    }
 
 @Composable
-private fun ImageStatusIndicator(status: ImageStatus) {
+private fun ImageStatusIndicator(status: ImageUploadStatus) {
   Row(
       horizontalArrangement = Arrangement.Center,
       verticalAlignment = Alignment.CenterVertically,
   ) {
     when (status) {
-      is ImageStatus.Pending -> {
+      is ImageUploadStatus.Pending -> {
         Text(
             "Waiting...",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
       }
-      is ImageStatus.Processing -> {
+      is ImageUploadStatus.InProgress -> {
         LoadingIndicator(Modifier.size(Dimens.loadingIndicatorSizeSmall))
         Spacer(modifier = Modifier.width(Dimens.spacingSmall))
         Text(stepToMessage(status.step), style = MaterialTheme.typography.bodyMedium)
       }
-      is ImageStatus.Completed -> {
+      is ImageUploadStatus.Completed -> {
         Icon(
             imageVector = Icons.Default.CheckCircle,
             contentDescription = "Completed",
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(Dimens.loadingIndicatorSizeSmall),
         )
-
         Spacer(modifier = Modifier.width(Dimens.spacingSmall))
         Text("Done", style = MaterialTheme.typography.bodyMedium)
       }
-      is ImageStatus.Failed -> {
+      is ImageUploadStatus.Failed -> {
         Icon(
             imageVector = Icons.Default.Warning,
             contentDescription = "Failed",
             tint = MaterialTheme.colorScheme.error,
             modifier = Modifier.size(Dimens.loadingIndicatorSizeSmall),
         )
-
         Spacer(modifier = Modifier.width(Dimens.spacingSmall))
-
         Text(
             status.error,
             style = MaterialTheme.typography.bodyMedium,
