@@ -24,9 +24,7 @@ class DeleteSolveWithImageUseCaseTest {
   fun setup() {
     repository = mockk()
     imageProcessor = mockk()
-
     useCase = DeleteSolveWithImageUseCase(repository, imageProcessor)
-
     mockkStatic(Uri::class)
   }
 
@@ -39,16 +37,11 @@ class DeleteSolveWithImageUseCaseTest {
   fun `deletes image and solve when solve exists`() = runTest {
     val imageUri = mockk<Uri>()
     val solve = TestData.createSolve(id = 1, imageUri = "file:///image.jpg")
-
     coEvery { repository.getSolveById(1L) } returns solve
-
     every { Uri.parse("file:///image.jpg") } returns imageUri
     every { imageProcessor.deleteImage(imageUri) } returns Unit
-
     coEvery { repository.deleteSolve(1L) } returns Unit
-
     useCase(1L)
-
     coVerify { imageProcessor.deleteImage(imageUri) }
     coVerify { repository.deleteSolve(1L) }
   }
@@ -56,9 +49,7 @@ class DeleteSolveWithImageUseCaseTest {
   @Test
   fun `does nothing when solve not found`() = runTest {
     coEvery { repository.getSolveById(999L) } returns null
-
     useCase(999L)
-
     coVerify(exactly = 0) { imageProcessor.deleteImage(any()) }
     coVerify(exactly = 0) { repository.deleteSolve(any()) }
   }

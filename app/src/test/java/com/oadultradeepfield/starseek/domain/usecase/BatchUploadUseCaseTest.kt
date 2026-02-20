@@ -1,11 +1,11 @@
 package com.oadultradeepfield.starseek.domain.usecase
 
-import android.net.Uri
 import app.cash.turbine.test
 import com.oadultradeepfield.starseek.domain.model.BatchUploadProgress
 import com.oadultradeepfield.starseek.domain.model.ImageUploadStatus
 import com.oadultradeepfield.starseek.domain.model.UploadStep
 import com.oadultradeepfield.starseek.domain.repository.ImageProcessor
+import com.oadultradeepfield.starseek.testutil.mockUri
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
@@ -33,17 +33,10 @@ class BatchUploadUseCaseTest {
     useCase = BatchUploadUseCase(processSingleUpload, imageProcessor, testDispatcher)
   }
 
-  private fun createUri(path: String = "file:///test/image.jpg"): Uri {
-    val uri = mockk<Uri>()
-    every { uri.toString() } returns path
-    return uri
-  }
-
   @Test
   fun `emits initial pending state`() = runTest {
-    val uri = createUri()
+    val uri = mockUri()
     every { processSingleUpload(uri) } returns flowOf(ImageUploadStatus.Completed(42L))
-
     useCase(listOf(uri)).test {
       val initial = awaitItem()
       assertEquals(1, initial.items.size)
@@ -54,13 +47,12 @@ class BatchUploadUseCaseTest {
 
   @Test
   fun `single upload completes`() = runTest {
-    val uri = createUri()
+    val uri = mockUri()
     every { processSingleUpload(uri) } returns
         flowOf(
             ImageUploadStatus.InProgress(UploadStep.Uploading),
             ImageUploadStatus.Completed(42L),
         )
-
     useCase(listOf(uri)).test {
       var lastStatus: ImageUploadStatus?
       while (true) {
@@ -75,13 +67,12 @@ class BatchUploadUseCaseTest {
 
   @Test
   fun `upload failure emits failed status`() = runTest {
-    val uri = createUri()
+    val uri = mockUri()
     every { processSingleUpload(uri) } returns
         flowOf(
             ImageUploadStatus.InProgress(UploadStep.Uploading),
             ImageUploadStatus.Failed("Network error"),
         )
-
     useCase(listOf(uri)).test {
       var lastStatus: ImageUploadStatus?
       while (true) {
@@ -96,7 +87,7 @@ class BatchUploadUseCaseTest {
 
   @Test
   fun `full upload flow emits all steps`() = runTest {
-    val uri = createUri()
+    val uri = mockUri()
     every { processSingleUpload(uri) } returns
         flowOf(
             ImageUploadStatus.InProgress(UploadStep.Uploading),
@@ -104,7 +95,6 @@ class BatchUploadUseCaseTest {
             ImageUploadStatus.InProgress(UploadStep.Saving),
             ImageUploadStatus.Completed(99L),
         )
-
     val steps = mutableListOf<ImageUploadStatus>()
     useCase(listOf(uri)).test {
       while (true) {
@@ -114,7 +104,6 @@ class BatchUploadUseCaseTest {
       }
       awaitComplete()
     }
-
     assertTrue(steps.any { it == ImageUploadStatus.Pending })
     assertTrue(steps.any { it == ImageUploadStatus.InProgress(UploadStep.Uploading) })
     assertTrue(steps.any { it == ImageUploadStatus.InProgress(UploadStep.Analyzing) })
@@ -124,8 +113,8 @@ class BatchUploadUseCaseTest {
 
   @Test
   fun `multiple images upload in parallel`() = runTest {
-    val uri1 = createUri("file:///test/image1.jpg")
-    val uri2 = createUri("file:///test/image2.jpg")
+    val uri1 = mockUri("file:///test/image1.jpg")
+    val uri2 = mockUri("file:///test/image2.jpg")
     every { processSingleUpload(uri1) } returns
         flowOf(
             ImageUploadStatus.InProgress(UploadStep.Uploading),
@@ -136,7 +125,6 @@ class BatchUploadUseCaseTest {
             ImageUploadStatus.InProgress(UploadStep.Uploading),
             ImageUploadStatus.Completed(2L),
         )
-
     useCase(listOf(uri1, uri2)).test {
       var lastItem: BatchUploadProgress?
       while (true) {
@@ -155,8 +143,8 @@ class BatchUploadUseCaseTest {
 
   @Test
   fun `partial failure with multiple images`() = runTest {
-    val uri1 = createUri("file:///test/image1.jpg")
-    val uri2 = createUri("file:///test/image2.jpg")
+    val uri1 = mockUri("file:///test/image1.jpg")
+    val uri2 = mockUri("file:///test/image2.jpg")
     every { processSingleUpload(uri1) } returns
         flowOf(
             ImageUploadStatus.InProgress(UploadStep.Uploading),
@@ -167,7 +155,6 @@ class BatchUploadUseCaseTest {
             ImageUploadStatus.InProgress(UploadStep.Uploading),
             ImageUploadStatus.Failed("Failed"),
         )
-
     useCase(listOf(uri1, uri2)).test {
       var lastItem: BatchUploadProgress?
       while (true) {
@@ -176,7 +163,6 @@ class BatchUploadUseCaseTest {
         val failed = lastItem.items.count { it.status is ImageUploadStatus.Failed }
         if (completed + failed == 2) break
       }
-
       val successCount = lastItem.items.count { it.status is ImageUploadStatus.Completed }
       val failCount = lastItem.items.count { it.status is ImageUploadStatus.Failed }
       assertEquals(1, successCount)
