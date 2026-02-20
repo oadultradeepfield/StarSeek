@@ -12,4 +12,6 @@ interface ImageProcessor {
   suspend fun compressForUpload(bytes: ByteArray): ByteArray
 
   fun deleteImage(uri: Uri)
+
+  fun logBenchmarkSummary()
 }

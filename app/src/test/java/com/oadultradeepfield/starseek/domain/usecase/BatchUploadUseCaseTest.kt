@@ -5,7 +5,9 @@ import app.cash.turbine.test
 import com.oadultradeepfield.starseek.domain.model.BatchUploadProgress
 import com.oadultradeepfield.starseek.domain.model.ImageUploadStatus
 import com.oadultradeepfield.starseek.domain.model.UploadStep
+import com.oadultradeepfield.starseek.domain.repository.ImageProcessor
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -20,12 +22,15 @@ import org.junit.Test
 class BatchUploadUseCaseTest {
   private val testDispatcher = UnconfinedTestDispatcher()
   private lateinit var processSingleUpload: ProcessSingleUploadUseCase
+  private lateinit var imageProcessor: ImageProcessor
   private lateinit var useCase: BatchUploadUseCase
 
   @Before
   fun setup() {
     processSingleUpload = mockk()
-    useCase = BatchUploadUseCase(processSingleUpload, testDispatcher)
+    imageProcessor = mockk()
+    justRun { imageProcessor.logBenchmarkSummary() }
+    useCase = BatchUploadUseCase(processSingleUpload, imageProcessor, testDispatcher)
   }
 
   private fun createUri(path: String = "file:///test/image.jpg"): Uri {

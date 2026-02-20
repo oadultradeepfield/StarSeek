@@ -5,6 +5,7 @@ import com.oadultradeepfield.starseek.di.BackgroundDispatcher
 import com.oadultradeepfield.starseek.domain.model.BatchUploadProgress
 import com.oadultradeepfield.starseek.domain.model.ImageUploadState
 import com.oadultradeepfield.starseek.domain.model.ImageUploadStatus
+import com.oadultradeepfield.starseek.domain.repository.ImageProcessor
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -18,6 +19,7 @@ class BatchUploadUseCase
 @Inject
 constructor(
     private val processSingleUpload: ProcessSingleUploadUseCase,
+    private val imageProcessor: ImageProcessor,
     @param:BackgroundDispatcher private val backgroundDispatcher: CoroutineDispatcher,
 ) {
   operator fun invoke(uris: List<Uri>): Flow<BatchUploadProgress> = channelFlow {
@@ -39,5 +41,7 @@ constructor(
           }
         }
         .awaitAll()
+
+    imageProcessor.logBenchmarkSummary()
   }
 }
