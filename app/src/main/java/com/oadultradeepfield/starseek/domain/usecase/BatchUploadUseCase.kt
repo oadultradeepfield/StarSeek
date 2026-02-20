@@ -11,8 +11,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
 class BatchUploadUseCase
@@ -24,11 +23,10 @@ constructor(
 ) {
   operator fun invoke(uris: List<Uri>): Flow<BatchUploadProgress> = channelFlow {
     val statuses =
-        uris.associateWith<Uri, ImageUploadStatus> { ImageUploadStatus.Pending }.toMutableMap()
-    val mutex = Mutex()
+        ConcurrentHashMap<Uri, ImageUploadStatus>(uris.associateWith { ImageUploadStatus.Pending })
 
     suspend fun updateAndEmit(uri: Uri, status: ImageUploadStatus) {
-      mutex.withLock { statuses[uri] = status }
+      statuses[uri] = status
       send(BatchUploadProgress(statuses.map { (u, s) -> ImageUploadState(u, s) }))
     }
 
