@@ -13,18 +13,12 @@ import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.request.bitmapConfig
-import coil3.request.transformations
 import coil3.size.Size
-import com.oadultradeepfield.starseek.data.image.StarFieldTransformation
 
-enum class ImagePreset(
-    val sizeDp: Int?,
-    val bitmapConfig: Bitmap.Config,
-    val allowEnhancement: Boolean,
-) {
-  THUMBNAIL_SMALL(64, Bitmap.Config.RGB_565, false),
-  THUMBNAIL_LARGE(300, Bitmap.Config.RGB_565, false),
-  FULL(null, Bitmap.Config.ARGB_8888, true),
+enum class ImagePreset(val sizeDp: Int?, val bitmapConfig: Bitmap.Config) {
+  THUMBNAIL_SMALL(64, Bitmap.Config.RGB_565),
+  THUMBNAIL_LARGE(300, Bitmap.Config.RGB_565),
+  FULL(null, Bitmap.Config.ARGB_8888),
 }
 
 @SuppressLint("LocalContextResourcesRead")
@@ -34,7 +28,6 @@ fun StarSeekAsyncImage(
     contentDescription: String?,
     modifier: Modifier = Modifier,
     preset: ImagePreset = ImagePreset.FULL,
-    enhance: Boolean = false,
     contentScale: ContentScale = ContentScale.Fit,
     alignment: Alignment = Alignment.Center,
     colorFilter: ColorFilter? = null,
@@ -53,9 +46,6 @@ fun StarSeekAsyncImage(
               size(Size(sizePx, sizePx))
             } else {
               size(Size.ORIGINAL)
-            }
-            if (enhance && preset.allowEnhancement) {
-              transformations(StarFieldTransformation())
             }
           }
           .build()

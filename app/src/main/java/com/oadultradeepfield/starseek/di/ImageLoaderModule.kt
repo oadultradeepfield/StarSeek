@@ -6,7 +6,6 @@ import coil3.disk.DiskCache
 import coil3.disk.directory
 import coil3.memory.MemoryCache
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
-import com.oadultradeepfield.starseek.data.image.ImageLoadingMetrics
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,7 +25,6 @@ object ImageLoaderModule {
   fun provideImageLoader(
       @ApplicationContext context: Context,
       okHttpClient: OkHttpClient,
-      metrics: ImageLoadingMetrics,
   ): ImageLoader =
       ImageLoader.Builder(context)
           .memoryCache {
@@ -39,6 +37,5 @@ object ImageLoaderModule {
                 .build()
           }
           .components { add(OkHttpNetworkFetcherFactory(callFactory = { okHttpClient })) }
-          .eventListener(metrics)
           .build()
 }

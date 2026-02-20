@@ -98,7 +98,6 @@ stars, nebulae, galaxies, and star clusters visible in the frame.
 │       ├── upload/         # Image upload screen
 │       ├── results/        # Solve results screen
 │       ├── history/        # History screen
-│       ├── debug/          # Debug screens (image benchmarking)
 │       └── navigation/     # Navigation setup
 └── backend/
     └── container_src/      # Go API server
