@@ -6,31 +6,33 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import com.oadultradeepfield.starseek.BuildConfig
+import com.oadultradeepfield.starseek.di.BackgroundDispatcher
 import com.oadultradeepfield.starseek.domain.repository.ImageProcessor
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.security.MessageDigest
 import java.util.UUID
-import java.util.concurrent.locks.ReentrantLock
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.concurrent.withLock
 import kotlin.system.measureNanoTime
 
 @Singleton
 class ImageProcessorImpl
 @Inject
-constructor(@param:ApplicationContext private val context: Context) : ImageProcessor {
+constructor(
+    @param:ApplicationContext private val context: Context,
+    @param:BackgroundDispatcher private val backgroundDispatcher: CoroutineDispatcher,
+) : ImageProcessor {
   private data class BenchmarkResult(val memKb: Int, val payloadKb: Int, val timeMs: Double)
 
-  private val benchmarkResults = mutableMapOf<String, MutableList<BenchmarkResult>>()
-  private val benchmarkLock = ReentrantLock()
+  private val benchmarkResults = ConcurrentHashMap<String, MutableList<BenchmarkResult>>()
 
   override suspend fun readBytes(uri: Uri): ByteArray =
-      withContext(Dispatchers.IO) {
+      withContext(backgroundDispatcher) {
         val inputStream =
             context.contentResolver.openInputStream(uri)
                 ?: throw IllegalStateException("Cannot open image")
@@ -45,7 +47,7 @@ constructor(@param:ApplicationContext private val context: Context) : ImageProce
   }
 
   override suspend fun copyToInternalStorage(bytes: ByteArray): Uri =
-      withContext(Dispatchers.IO) {
+      withContext(backgroundDispatcher) {
         val dir = File(context.filesDir, IMAGES_DIR).apply { mkdirs() }
         val file = File(dir, "${UUID.randomUUID()}.jpg")
 
@@ -54,14 +56,15 @@ constructor(@param:ApplicationContext private val context: Context) : ImageProce
       }
 
   override suspend fun compressForUpload(bytes: ByteArray): ByteArray =
-      withContext(Dispatchers.IO) {
+      withContext(backgroundDispatcher) {
         if (BuildConfig.DEBUG) collectBenchmark(bytes)
 
-        val opts = BitmapFactory.Options().apply {
-          inPreferredConfig = Bitmap.Config.RGB_565
-          inSampleSize = 2
-        }
-          
+        val opts =
+            BitmapFactory.Options().apply {
+              inPreferredConfig = Bitmap.Config.RGB_565
+              inSampleSize = 2
+            }
+
         val bitmap =
             BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts)
                 ?: throw IllegalStateException("Cannot decode image")
@@ -116,32 +119,27 @@ constructor(@param:ApplicationContext private val context: Context) : ImageProce
           cfg.name to BenchmarkResult(memKb, payloadKb, timeNs / 1_000_000.0)
         }
 
-    benchmarkLock.withLock {
-      results.forEach { (name, result) ->
-        benchmarkResults.getOrPut(name) { mutableListOf() }.add(result)
-      }
+    results.forEach { (name, result) ->
+      benchmarkResults.compute(name) { _, list -> (list ?: mutableListOf()).apply { add(result) } }
     }
   }
 
   override fun logBenchmarkSummary() {
     if (!BuildConfig.DEBUG) return
 
+    if (benchmarkResults.isEmpty()) return
+    val count = benchmarkResults.values.firstOrNull()?.size ?: return
+
+    Log.d(TAG, "=== Image Decode Benchmark (avg of $count images) ===")
+
     val averaged =
-        synchronized(benchmarkLock) {
-          if (benchmarkResults.isEmpty()) return
-          val count = benchmarkResults.values.first().size
-
-          Log.d(TAG, "=== Image Decode Benchmark (avg of $count images) ===")
-
-          CONFIG_ORDER.mapNotNull { name ->
-                benchmarkResults[name]?.let { list ->
-                  val avgMem = list.map { it.memKb }.average().toInt()
-                  val avgPayload = list.map { it.payloadKb }.average().toInt()
-                  val avgTime = list.map { it.timeMs }.average()
-                  name to BenchmarkResult(avgMem, avgPayload, avgTime)
-                }
-              }
-              .also { benchmarkResults.clear() }
+        CONFIG_ORDER.mapNotNull { name ->
+          benchmarkResults.remove(name)?.let { list ->
+            val avgMem = list.map { it.memKb }.average().toInt()
+            val avgPayload = list.map { it.payloadKb }.average().toInt()
+            val avgTime = list.map { it.timeMs }.average()
+            name to BenchmarkResult(avgMem, avgPayload, avgTime)
+          }
         }
 
     if (averaged.isEmpty()) return
