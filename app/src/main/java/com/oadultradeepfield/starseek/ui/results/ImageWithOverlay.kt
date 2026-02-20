@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -77,7 +78,7 @@ fun ImageWithOverlay(
             computeCoordinateTransform(displayedSize, intrinsicWidth)
           }
 
-      Canvas(modifier = Modifier.fillMaxSize()) {
+      Canvas(modifier = Modifier.fillMaxSize().clipToBounds()) {
         objects.forEach { obj ->
           val px = obj.pixelX ?: return@forEach
           val py = obj.pixelY ?: return@forEach
