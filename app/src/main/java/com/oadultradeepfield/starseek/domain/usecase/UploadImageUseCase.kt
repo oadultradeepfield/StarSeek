@@ -20,8 +20,8 @@ constructor(
 
       if (cached != null) return UploadImageResult.CacheHit(cached.id)
 
-      val internalUri = imageProcessor.copyToInternalStorage(imageBytes)
       val compressedBytes = imageProcessor.compressForUpload(imageBytes)
+      val internalUri = imageProcessor.copyToInternalStorage(compressedBytes)
 
       repository
           .uploadImage(compressedBytes, "image.jpg")
