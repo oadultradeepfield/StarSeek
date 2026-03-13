@@ -20,6 +20,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.system.measureNanoTime
 
+class ImageTooSmallException(
+    actualPixels: Long,
+    val minPixels: Long,
+) : Exception("Image too small: $actualPixels pixels (minimum: $minPixels)")
+
 @Singleton
 class ImageProcessorImpl
 @Inject
@@ -59,10 +64,19 @@ constructor(
       withContext(backgroundDispatcher) {
         if (BuildConfig.DEBUG) collectBenchmark(bytes)
 
+        val bounds = decodeBounds(bytes)
+        val pixels = bounds.outWidth.toLong() * bounds.outHeight
+
+        if (pixels < MIN_PIXELS) {
+          throw ImageTooSmallException(pixels, MIN_PIXELS.toLong())
+        }
+
+        val sampleSize = calculateSampleSize(bounds.outWidth, bounds.outHeight)
+
         val opts =
             BitmapFactory.Options().apply {
               inPreferredConfig = Bitmap.Config.RGB_565
-              inSampleSize = 2
+              inSampleSize = sampleSize
             }
 
         val bitmap =
@@ -84,6 +98,22 @@ constructor(
 
   override fun deleteImage(uri: Uri) {
     uri.path?.let { File(it).delete() }
+  }
+
+  private fun decodeBounds(bytes: ByteArray): BitmapFactory.Options {
+    val opts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+    BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts)
+    return opts
+  }
+
+  private fun calculateSampleSize(width: Int, height: Int): Int {
+    val pixels = width.toLong() * height
+    return when {
+      pixels < 1_000_000 -> 1
+      pixels < 4_000_000 -> 2
+      pixels < 16_000_000 -> 4
+      else -> 8
+    }
   }
 
   private fun collectBenchmark(bytes: ByteArray) {
@@ -181,6 +211,7 @@ constructor(
     private const val TAG = "ImageProcessor"
     private const val MAX_SIZE_BYTES = 2 * 1024 * 1024
     private const val IMAGES_DIR = "images"
+    private const val MIN_PIXELS = 250_000
     private val CONFIG_ORDER = listOf("ARGB_8888", "RGB_565", "RGB_565 2x", "RGB_565 4x")
   }
 }
