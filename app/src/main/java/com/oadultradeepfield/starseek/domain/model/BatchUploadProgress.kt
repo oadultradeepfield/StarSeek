@@ -18,6 +18,8 @@ sealed class ImageUploadStatus {
   data class Completed(val solveId: Long) : ImageUploadStatus()
 
   data class Failed(val error: String) : ImageUploadStatus()
+
+  data class ImageTooSmall(val minPixels: Long) : ImageUploadStatus()
 }
 
 data class ImageUploadState(val uri: Uri, val status: ImageUploadStatus)

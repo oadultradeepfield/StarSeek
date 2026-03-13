@@ -9,4 +9,6 @@ sealed class UploadImageResult {
       UploadImageResult()
 
   data class Failure(val error: String) : UploadImageResult()
+
+  data class ImageTooSmall(val minPixels: Long) : UploadImageResult()
 }
