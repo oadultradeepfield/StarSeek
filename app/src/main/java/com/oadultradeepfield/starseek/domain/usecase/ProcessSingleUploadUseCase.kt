@@ -22,6 +22,8 @@ constructor(
     when (val uploadResult = uploadImage(uri)) {
       is UploadImageResult.CacheHit -> emit(ImageUploadStatus.Completed(uploadResult.solveId))
       is UploadImageResult.Failure -> emit(ImageUploadStatus.Failed(uploadResult.error))
+      is UploadImageResult.ImageTooSmall ->
+          emit(ImageUploadStatus.ImageTooSmall(uploadResult.minPixels))
 
       is UploadImageResult.Uploaded -> {
         emit(ImageUploadStatus.InProgress(UploadStep.Analyzing))

@@ -67,9 +67,19 @@ constructor(
                 (it.status as? ImageUploadStatus.Failed)?.error
               }
 
+          val imageTooSmallError =
+              currentState.items.firstNotNullOfOrNull {
+                (it.status as? ImageUploadStatus.ImageTooSmall)?.minPixels
+              }
+
           _uiState.update {
             when {
               successIds.isNotEmpty() -> UploadUiState.Success(successIds)
+              imageTooSmallError != null ->
+                  UploadUiState.Error(
+                      "Image too small. Minimum size is ${imageTooSmallError / 1_000_000}MP",
+                      uris,
+                  )
               firstError != null -> UploadUiState.Error(firstError, uris)
               else -> UploadUiState.Error("Unknown error", uris)
             }

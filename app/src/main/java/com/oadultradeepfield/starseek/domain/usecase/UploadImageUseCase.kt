@@ -1,6 +1,7 @@
 package com.oadultradeepfield.starseek.domain.usecase
 
 import android.net.Uri
+import com.oadultradeepfield.starseek.data.image.ImageTooSmallException
 import com.oadultradeepfield.starseek.domain.model.UploadImageResult
 import com.oadultradeepfield.starseek.domain.repository.ImageProcessor
 import com.oadultradeepfield.starseek.domain.repository.SolveRepository
@@ -29,6 +30,8 @@ constructor(
               onSuccess = { jobId -> UploadImageResult.Uploaded(jobId, internalUri, imageHash) },
               onFailure = { e -> UploadImageResult.Failure(e.message ?: "Upload failed") },
           )
+    } catch (e: ImageTooSmallException) {
+      UploadImageResult.ImageTooSmall(e.minPixels)
     } catch (e: Exception) {
       UploadImageResult.Failure(e.message ?: "Failed to process image")
     }
