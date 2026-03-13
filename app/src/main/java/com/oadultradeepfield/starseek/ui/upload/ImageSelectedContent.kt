@@ -246,6 +246,20 @@ private fun ImageStatusIndicator(status: ImageUploadStatus) {
             color = MaterialTheme.colorScheme.error,
         )
       }
+      is ImageUploadStatus.ImageTooSmall -> {
+        Icon(
+            imageVector = Icons.Default.Warning,
+            contentDescription = "Image too small",
+            tint = MaterialTheme.colorScheme.error,
+            modifier = Modifier.size(Dimens.loadingIndicatorSizeSmall),
+        )
+        Spacer(modifier = Modifier.width(Dimens.spacingSmall))
+        Text(
+            "Image too small",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.error,
+        )
+      }
     }
   }
 }
